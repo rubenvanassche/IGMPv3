@@ -144,3 +144,9 @@ click/userlevel/elements.cc
 click/userlevel/elements.conf
 
 click/userlevel/elements.mk
+
+click/conftest.c
+
+click/confdefs.h
+
+click/conftest.err
