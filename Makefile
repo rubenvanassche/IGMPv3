@@ -7,4 +7,4 @@ configure:
 	cd click; ./configure --disable-linuxmodule --enable-local --enable-etherswitch
 
 test:
-	cd click; click conf/test.click
+	cd click; userlevel/click conf/test.click
