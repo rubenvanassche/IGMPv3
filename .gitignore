@@ -150,3 +150,7 @@ click/conftest.c
 click/confdefs.h
 
 click/conftest.err
+
+click/autom4te.cache/
+
+click/configure
