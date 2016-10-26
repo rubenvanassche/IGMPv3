@@ -33,4 +33,4 @@
 *.su
 
 # OS X
-.DS_Store
+#.DS_Store
