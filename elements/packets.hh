@@ -10,6 +10,7 @@ struct igmpv3query {
   uint8_t resv_and_s_and_qrv;
   uint8_t qqic;
   uint16_t no_of_sources;
+  uint32_t sources[1];
 };
 
 // see RFC 3376 for details
@@ -18,7 +19,7 @@ struct grouprecord {
   uint8_t aux_data_len;
   uint16_t no_of_sources;
   uint32_t multicast_address;
-  unsigned int sources[1];
+  uint32_t sources[1];
 };
 
 struct igmpv3report {
@@ -27,6 +28,7 @@ struct igmpv3report {
   uint16_t checksum;
   uint16_t reserved_short;
   uint16_t no_of_grouprecords;
+  uint32_t records[1];
 };
 
 #endif

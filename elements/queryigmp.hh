@@ -24,7 +24,7 @@ int QueryIGMPElement::configure(Vector<String> &conf, ErrorHandler *errh) {
  * @param r
  *
  * Generates an IGMP Query Message, should be wrapped in an IP package with destination 224.0.0.1 or 224.0.0.22(see RFC)
- * IP TTL should be 1
+ *
  */
 void QueryIGMPElement::push(int, Packet *r){
     /**
@@ -45,7 +45,7 @@ void QueryIGMPElement::push(int, Packet *r){
         return click_chatter( "cannot make igmpv3query packet!");
     }
     memset(packet−>data(), 0, packet−>length());
-    igmpv3query* format=(igmpv3query*)packet−>data();
+    igmpv3query* format = (igmpv3query*)packet−>data();
     // Type for IGMP Query Packet
     format>type = 0x11;
     // TODO: the responsecode may vary, the value 1 is ok
@@ -58,8 +58,6 @@ void QueryIGMPElement::push(int, Packet *r){
     format->qqic = 0x00;
 
     format->checksum = 0x0000;
-
-
 
 
 }
