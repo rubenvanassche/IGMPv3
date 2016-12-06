@@ -6,14 +6,14 @@
 CLICK_DECLS
 
 QueryIGMPElement::QueryIGMPElement(){}
-~QueryIGMPElement::QueryIGMPElement(){}
+QueryIGMPElement::~QueryIGMPElement(){}
 
 int QueryIGMPElement::configure(Vector<String> &conf, ErrorHandler *errh) {
     if(cp_va_kparse(conf, this, errh, "MAXPACKETSIZE", cpkM, cpInteger, &maxSize, cpEnd) < 0){
-        return −1;
+        return -1;
     }
     if(maxSize <= 0){
-        return errh−>error("maxsize should be larger than 0");
+        return errh->error("maxsize should be larger than 0");
     }
     return 0;
 }
@@ -35,7 +35,9 @@ void QueryIGMPElement::push(int, Packet *r){
         output(0).push(p);
     }
     **/
-    IPaddress group = IPAddress("232.2.2.2");
+    IPAddress group = IPAddress("232.2.2.2");
+
+    igmpv3query *x = nullptr;
 
     int tailroom = 0;
     int packetsize = sizeof(igmpv3query);
@@ -44,14 +46,14 @@ void QueryIGMPElement::push(int, Packet *r){
     if(packet == 0 ){
         return click_chatter( "cannot make igmpv3query packet!");
     }
-    memset(packet−>data(), 0, packet−>length());
-    igmpv3query* format = (igmpv3query*)packet−>data();
+    memset(packet->data(), 0, packet->length());
+    igmpv3query* format = (igmpv3query*)packet->data();
     // Type for IGMP Query Packet
-    format>type = 0x11;
+    format->type = 0x11;
     // TODO: the responsecode may vary, the value 1 is ok
-    format−>max_response_code = 1;
+    format->max_response_code = 1;
     // The address of the multicast group
-    format−>group = group;
+    format->group_address = group;
     // TODO: querier robustness value (qrv) instructs the host to send all messages qrv times
     format->resv_and_s_and_qrv = 0x03;
     // TODO: this
@@ -62,4 +64,5 @@ void QueryIGMPElement::push(int, Packet *r){
 
 }
 
-CLICK_ENDDECLS EXPORT_ELEMENT(QueryIGMPElement)
+CLICK_ENDDECLS
+EXPORT_ELEMENT(QueryIGMPElement)

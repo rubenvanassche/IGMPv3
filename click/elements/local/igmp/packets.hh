@@ -1,6 +1,7 @@
 #ifndef CLICK_PACKETS_HH
 #define CLICK_PACKETS_HH
 
+
 // Protocol Headers
 struct igmpv3query {
   uint8_t type;
