@@ -11,7 +11,7 @@ struct igmpv3query {
   uint8_t resv_and_s_and_qrv;
   uint8_t qqic;
   uint16_t no_of_sources;
-  uint32_t sources[1];
+  uint32_t sources[0];
 };
 
 // see RFC 3376 for details

@@ -1,6 +1,6 @@
 all: build test
 
-build: copy 
+build: copy
 	cd click; make elemlist; make -j2
 
 configure:
@@ -11,3 +11,4 @@ copy:
 
 test:
 	cd click; userlevel/click conf/test.click
+	cd click; userlevel/click ../scripts/test/setup.click
