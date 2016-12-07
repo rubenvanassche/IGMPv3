@@ -61,6 +61,9 @@ void ReportIGMPElement::push(int, Packet *r){
         //format->sources[i] = grouprecordVector.at(i).addr();
     }
 
+    // Let's calculate the checksum
+    format->checksum = click_in_cksum((unsigned char *)format, packet->length());
+
     output(0).push(packet);
 }
 

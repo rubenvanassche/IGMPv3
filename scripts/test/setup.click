@@ -16,5 +16,5 @@ elementclass ReportIGMP {
         -> [0]output;
 }
 
-qi::ReportIGMP;
+qi::QueryIGMP;
 qi->ToDump("qi.dump");
