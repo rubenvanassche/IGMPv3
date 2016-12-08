@@ -9,6 +9,13 @@ template class Vector<SomeThing>;
 #endif
 CLICK_DECLS
 
+// High order grouprecord
+struct grouprecord{
+	uint8_t type;
+	IPAddress multicast_address;
+	Vector<IPAddress> sources;
+};
+
 /**
  * Send an IGMP Report over the network on the output port
  * IP Addresses are stored in the config array
@@ -27,12 +34,18 @@ public:
 
 	void run_timer(Timer*);
 
+	grouprecord* generateRecord(uint8_t type, IPAddress multicast_address, Vector<IPAddress>& sources);
+
     void push(int, Packet*);
 private:
+	// Calculate the amount of bytes the group records array needs
 	int calculateGrouprecordsSize();
 
+	// Calculate the amount of bytes a single group record needs
+	int calculateGrouprecordSize(grouprecord* record);
+
     uint32_t maxSize;
-	Vector<grouprecord> grouprecordVector;
+	Vector<grouprecord*> grouprecordVector;
 	Timer timer;
 };
 CLICK_ENDDECLS

@@ -15,7 +15,7 @@ struct igmpv3query {
 };
 
 // see RFC 3376 for details
-struct grouprecord {
+struct igmpv3grouprecord {
   uint8_t type;
   uint8_t aux_data_len;
   uint16_t no_of_sources;
