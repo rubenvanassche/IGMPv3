@@ -9,12 +9,6 @@ template class Vector<SomeThing>;
 #endif
 CLICK_DECLS
 
-// High order grouprecord
-struct grouprecord{
-	uint8_t type;
-	IPAddress multicast_address;
-	Vector<IPAddress> sources;
-};
 
 /**
  * Send an IGMP Report over the network on the output port

@@ -25,5 +25,14 @@ elementclass DecodeQueryIGMP {
         -> decoder;
 }
 
-qi::QueryIGMP;
-qi->ToDump("qi.dump")->DecodeQueryIGMP;
+elementclass DecodeReportIGMP {
+    decoder::DecodeReportIGMP;
+
+    input[0]
+        -> Strip(14)
+        -> StripIPHeader()
+        -> decoder;
+}
+
+qi::ReportIGMP;
+qi->ToDump("qi.dump")->DecodeReportIGMP;

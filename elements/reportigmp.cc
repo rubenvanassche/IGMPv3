@@ -12,16 +12,16 @@ ReportIGMPElement::~ReportIGMPElement(){}
 int ReportIGMPElement::configure(Vector<String> &conf, ErrorHandler *errh) {
     // Generate some basic reports for testing
     Vector<IPAddress> addresses1;
-    //addresses1.push_back(IPAddress("86.78.34.24"));
-    //addresses1.push_back(IPAddress("102.78.34.24"));
-    //addresses1.push_back(IPAddress("105.78.34.24"));
+    addresses1.push_back(IPAddress("86.78.34.24"));
+    addresses1.push_back(IPAddress("102.78.34.24"));
+    addresses1.push_back(IPAddress("105.78.34.24"));
 
     Vector<IPAddress> addresses2;
-    //addresses2.push_back(IPAddress("86.78.34.24"));
-    //addresses2.push_back(IPAddress("102.78.34.24"));
+    addresses2.push_back(IPAddress("86.78.34.24"));
+    addresses2.push_back(IPAddress("102.78.34.24"));
 
     Vector<IPAddress> addresses3;
-    //addresses3.push_back(IPAddress("86.78.34.24"));
+    addresses3.push_back(IPAddress("86.78.34.24"));
 
     grouprecord* r1 = this->generateRecord(0x02, IPAddress("192.168.1.1"), addresses1);
     grouprecord* r2 = this->generateRecord(0x02, IPAddress("192.168.1.6"), addresses2);

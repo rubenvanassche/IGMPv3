@@ -32,4 +32,11 @@ struct igmpv3report {
   uint32_t records[0];
 };
 
+// High order grouprecord
+struct grouprecord{
+	uint8_t type;
+	IPAddress multicast_address;
+	Vector<IPAddress> sources;
+};
+
 #endif
