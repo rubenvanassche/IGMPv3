@@ -35,7 +35,7 @@ void QueryIGMPElement::run_timer(Timer* t){
  *
  */
 void QueryIGMPElement::push(int, Packet *r){
-    IPAddress group = IPAddress("0.0.0.0");
+    IPAddress group = IPAddress("1.2.3.4");
 
     int packetsize = sizeof(igmpv3query);
     int sourcesSize = sourcesVector.size() * sizeof(in_addr); // Allocate space for IP Adresses

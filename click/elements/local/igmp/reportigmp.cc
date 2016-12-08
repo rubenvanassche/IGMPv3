@@ -12,16 +12,16 @@ ReportIGMPElement::~ReportIGMPElement(){}
 int ReportIGMPElement::configure(Vector<String> &conf, ErrorHandler *errh) {
     // Generate some basic reports for testing
     Vector<IPAddress> addresses1;
-    addresses1.push_back(IPAddress("86.78.34.24"));
-    addresses1.push_back(IPAddress("102.78.34.24"));
-    addresses1.push_back(IPAddress("105.78.34.24"));
+    //addresses1.push_back(IPAddress("86.78.34.24"));
+    //addresses1.push_back(IPAddress("102.78.34.24"));
+    //addresses1.push_back(IPAddress("105.78.34.24"));
 
     Vector<IPAddress> addresses2;
-    addresses2.push_back(IPAddress("86.78.34.24"));
-    addresses2.push_back(IPAddress("102.78.34.24"));
+    //addresses2.push_back(IPAddress("86.78.34.24"));
+    //addresses2.push_back(IPAddress("102.78.34.24"));
 
     Vector<IPAddress> addresses3;
-    addresses3.push_back(IPAddress("86.78.34.24"));
+    //addresses3.push_back(IPAddress("86.78.34.24"));
 
     grouprecord* r1 = this->generateRecord(0x02, IPAddress("192.168.1.1"), addresses1);
     grouprecord* r2 = this->generateRecord(0x02, IPAddress("192.168.1.6"), addresses2);
@@ -43,21 +43,6 @@ void ReportIGMPElement::run_timer(Timer* t){
 }
 
 grouprecord* ReportIGMPElement::generateRecord(uint8_t type, IPAddress multicast_address, Vector<IPAddress>& sources){
-    /*
-    igmpv3grouprecord* record = new igmpv3grouprecord();
-    record->type = type;
-    record->aux_data_len = 0x02;
-    // TODO: No htons here? Why?
-    uint16_t no_of_sources = static_cast<uint16_t>(sources.size());
-    record->no_of_sources = htons(no_of_sources);
-    record->multicast_address = multicast_address.addr();
-
-    for(int i = 0;i < sources.size();i++){
-        record->sources[i] = sources.at(i).addr();
-    }
-
-    return record;
-    */
    grouprecord* record = new grouprecord;
    record->type = type;
    record->multicast_address = multicast_address;
@@ -97,7 +82,6 @@ int ReportIGMPElement::calculateGrouprecordSize(grouprecord* record){
 void ReportIGMPElement::push(int, Packet *r){
     int packetsize = sizeof(igmpv3report);
     int sourcesSize = this->calculateGrouprecordsSize(); // Allocate space for IP Adresses
-
 
     WritablePacket *packet = Packet::make(0,0,packetsize + sourcesSize, 0);
     if(packet == 0 ){
