@@ -35,7 +35,7 @@ void QueryIGMPElement::run_timer(Timer* t){
  *
  */
 void QueryIGMPElement::push(int, Packet *r){
-    IPAddress group = IPAddress("0.0.0.0");
+    IPAddress group = IPAddress("1.2.3.4");
 
     int packetsize = sizeof(igmpv3query);
     int sourcesSize = sourcesVector.size() * sizeof(in_addr); // Allocate space for IP Adresses
@@ -53,7 +53,7 @@ void QueryIGMPElement::push(int, Packet *r){
     // TODO: the responsecode may vary, the value 1 is ok
     format->max_response_code = 0x18;
     // Checksum will be calculated later
-    format->checksum = 0xd3ec;
+    format->checksum = 0x0000;
     // The address of the multicast group
     format->group_address = group.addr();
     // TODO: querier robustness value (qrv) instructs the host to send all messages qrv times
@@ -66,6 +66,9 @@ void QueryIGMPElement::push(int, Packet *r){
     for(int i = 0;i < sourcesVector.size();i++){
         format->sources[i] = sourcesVector.at(i).addr();
     }
+
+    // Set the checksum
+    format->checksum = click_in_cksum((unsigned char *)format, packet->length());
 
     output(0).push(packet);
 }

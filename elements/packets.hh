@@ -15,21 +15,28 @@ struct igmpv3query {
 };
 
 // see RFC 3376 for details
-struct grouprecord {
+struct igmpv3grouprecord {
   uint8_t type;
   uint8_t aux_data_len;
   uint16_t no_of_sources;
   uint32_t multicast_address;
-  uint32_t sources[1];
+  uint32_t sources[0];
 };
 
 struct igmpv3report {
   uint8_t type;
   uint8_t reserved;
   uint16_t checksum;
-  uint16_t reserved_short;
+  uint16_t reserved_long;
   uint16_t no_of_grouprecords;
-  uint32_t records[1];
+  uint32_t records[0];
+};
+
+// High order grouprecord
+struct grouprecord{
+	uint8_t type;
+	IPAddress multicast_address;
+	Vector<IPAddress> sources;
 };
 
 #endif
