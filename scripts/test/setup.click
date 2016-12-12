@@ -34,5 +34,5 @@ elementclass DecodeReportIGMP {
         -> decoder;
 }
 
-qi::ReportIGMP;
-qi->ToDump("qi.dump")->DecodeReportIGMP;
+qi::QueryIGMP;
+qi->ToDump("qi.dump")->DecodeQueryIGMP;
