@@ -9,6 +9,8 @@ configure:
 copy:
 	cp -R elements/. click/elements/local/igmp
 
+app:
+	cd click/apps/ClickController; java ClickController localhost 1981
+
 test:
-	cd click; userlevel/click conf/test.click
-	cd click; userlevel/click ../scripts/test/setup.click
+	cd click; userlevel/click ../scripts/test/handler.click -p 1981

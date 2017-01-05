@@ -1,6 +1,10 @@
 #ifndef CLICK_PACKETS_HH
 #define CLICK_PACKETS_HH
+#include <click/vector.cc>
 
+#if EXPLICIT_TEMPLATE_INSTANCES
+template class Vector<SomeThing>;
+#endif
 
 // Protocol Headers
 struct igmpv3query {
@@ -38,5 +42,14 @@ struct grouprecord{
 	IPAddress multicast_address;
 	Vector<IPAddress> sources;
 };
+
+enum filtermode {INCLUDE, EXCLUDE};
+
+struct interfacerecord{
+    IPAddress multicast_address;
+    Vector<IPAddress> sources;
+    filtermode filter_mode;
+};
+
 
 #endif
