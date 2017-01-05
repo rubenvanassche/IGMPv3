@@ -1,19 +1,20 @@
-#ifndef CLICK_PACKETS_HH
-#define CLICK_PACKETS_HH
+#ifndef CLICK_HELPERS_HH
+#define CLICK_HELPERS_HH
 #include <click/element.hh>
-#include <click/String.cc>
 #include <click/vector.cc>
 
 #if EXPLICIT_TEMPLATE_INSTANCES
 template class Vector<SomeThing>;
 #endif
 
-Vector<IPAdresss> parseSourcesAdressesFromConfig(const String &conf, ErrorHandler * errh){
+CLICK_DECLS
 
-}
+class ConfigParse{
+public:
+    Vector<IPAddress> sources(const String &conf, ErrorHandler * errh);
+    IPAddress multicastAddress(const String &conf, ErrorHandler * errh);
+};
 
-IPAddress parseSourcesFromConfig(const String &conf, ErrorHandler * errh){
-
-}
+CLICK_ENDDECLS
 
 #endif

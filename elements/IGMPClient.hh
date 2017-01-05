@@ -4,7 +4,6 @@
 #include <click/vector.cc>
 #include <click/args.hh>
 #include "packets.hh"
-#include "helpers.hh"
 
 #if EXPLICIT_TEMPLATE_INSTANCES
 template class Vector<SomeThing>;
@@ -38,6 +37,12 @@ class IGMPClient : public Element {
 		void add_handlers();
 	private:
 		Vector<interfacerecord*> interfacerecords;
+};
+
+class ConfigParse{
+public:
+    Vector<IPAddress> sources(const String &conf, ErrorHandler * errh);
+    IPAddress multicastAddress(const String &conf, ErrorHandler * errh);
 };
 
 CLICK_ENDDECLS

@@ -99,26 +99,49 @@ void IGMPClient::excludeSources(IPAddress multicast_address, Vector<IPAddress> s
 
 int IGMPClient::includeSourcesHandler(const String &conf, Element *e, void * thunk, ErrorHandler * errh){
 	IGMPClient* me = (IGMPClient *) e;
+	ConfigParse p;
 
-	IPAddress multicast_address;
-	String multicast_string;
+	Vector<IPAddress> sources = p.sources(conf, errh);
+	IPAddress multicast_address = p.multicastAddress(conf, errh);
+
+	me->includeSources(multicast_address, sources);
+
+	return 0;
+}
+
+int IGMPClient::excludeSources(const String &conf, Element *e, void * thunk, ErrorHandler * errh){
+	IGMPClient* me = (IGMPClient *) e;
+	ConfigParse p;
+
+	Vector<IPAddress> sources = p.sources(conf, errh);
+	IPAddress multicast_address = p.multicastAddress(conf, errh);
+
+	me->excludeSources(multicast_address, sources);
+
+	return 0;
+}
+
+void IGMPClient::add_handlers(){
+	add_write_handler("include_sources", &includeSourcesHandler, (void *)0);
+	add_write_handler("exclude_sources", &excludeSourcesHandler, (void *)0);
+}
+
+Vector<IPAddress> ConfigParse::sources(const String &conf, ErrorHandler * errh){
 	String sources_string;
 	String source_address;
+    String multicast_address;
 	Vector<IPAddress> sources;
 
 	// Parse
-	if(Args(me, errh)
+	if(Args(errh)
 	.push_back_args(conf)
-	.read_m("M", multicast_string)
+	.read_m("M", multicast_address)
 	.read_m("S", sources_string)
 	.complete() < 0){
 		click_chatter("Failed reading include sources");
 
-		return -1;
+		return sources;
 	}
-
-	// Parse Multicast Address
-	multicast_address = IPAddress(multicast_string);
 
 	// Seperate the sources_string
 	for(int i = 0;i < sources_string.length(); i++){
@@ -137,18 +160,27 @@ int IGMPClient::includeSourcesHandler(const String &conf, Element *e, void * thu
 		}
 	}
 
-	me->includeSources(multicast_address, sources);
-
-	return 0;
+    return sources;
 }
 
-int IGMPClient::excludeSources(const String &conf, Element *e, void * thunk, ErrorHandler * errh){
-	IGMPClient* me = (IGMPClient *) e;
-	click_chatter("Test handler");
-}
+IPAddress ConfigParse::multicastAddress(const String &conf, ErrorHandler * errh){
+    String sources_string;
+    String multicast_address;
 
-void IGMPClient::add_handlers(){
-	add_write_handler("include_sources", &includeSourcesHandler, (void *)0);
+	// Parse
+	if(Args(errh)
+	.push_back_args(conf)
+	.read_m("M", multicast_address)
+	.read_m("S", sources_string)
+	.complete() < 0){
+		click_chatter("Failed reading include sources");
+
+		return IPAddress("0.0.0.0");
+	}
+
+    return IPAddress(multicast_address);
+
+
 }
 
 CLICK_ENDDECLS
