@@ -1,101 +1,36 @@
 #include <click/config.h>
+#include <click/timer.hh>
 // #include <click/TODO.hh>
 #include "IGMPClient.hh"
 
 CLICK_DECLS
 
-IGMPClient::IGMPClient() { };
+IGMPClient::IGMPClient():  timer(this) { };
 IGMPClient::~IGMPClient() { };
 
-Packet *IGMPClient::simple_action(Packet *p) {
-	// TODO: fill
+int IGMPClient::configure(Vector<String> &conf, ErrorHandler *errh) {
+    // init timer
+    timer.initialize(this);
+    timer.schedule_after_msec(1000);
+    return 0;
+}
 
-	return p;
+void IGMPClient::run_timer(Timer* t){
+    timer.schedule_after_msec(1000);
+    this->push(nullptr);
+}
+
+void IGMPClient::push(Packet *p) {
+	Packet* packet = this->reporter.simple_action(0, nullptr);
+
+	if(packet == nullptr){
+		return;
+	}
+
+	click_chatter("Packet send");
+	output(0).push(packet);
 };
 
-interfacerecord* IGMPClient::getInterfacerecord(IPAddress multicast_address){
-	for(int i = 0; i < this->interfacerecords.size();i++){
-		interfacerecord* record = this->interfacerecords.at(i);
-		if(record->multicast_address == multicast_address){
-			return record;
-		}
-	}
-
-	return nullptr;
-}
-
-void IGMPClient::includeSources(IPAddress multicast_address, Vector<IPAddress> sources){
-	interfacerecord* record = this->getInterfacerecord(multicast_address);
-
-	if(record == nullptr){
-		// New multicast address
-		record = new interfacerecord();
-		record->multicast_address = multicast_address;
-		record->sources = sources;
-		record->filter_mode = INCLUDE;
-	}else{
-		if(record->filter_mode == INCLUDE){
-			// Union
-			for(int i = 0;i < sources.size();i++){
-				bool inRecord = false;
-
-				for(int j = 0;j < record->sources.size();j++){
-					if(record->sources.at(j) == sources.at(i)){
-						// Source is already in record
-						inRecord = true;
-						break;
-					}
-				}
-
-				if(inRecord == false){
-					// Add source to record
-					record->sources.push_back(sources.at(i));
-				}
-			}
-		}else if(record->filter_mode == EXCLUDE){
-			// TODO: sent TO_EX event
-			record->filter_mode = EXCLUDE;
-
-			record->sources.clear();
-
-			for(int i = 0;i < sources.size();i++){
-				record->sources.push_back(sources.at(i));
-			}
-		}else{
-			click_chatter("Wrong include sources mode");
-		}
-	}
-}
-void IGMPClient::excludeSources(IPAddress multicast_address, Vector<IPAddress> sources){
-	interfacerecord* record = this->getInterfacerecord(multicast_address);
-
-	if(record == nullptr){
-		// New multicast address
-		record = new interfacerecord();
-		record->multicast_address = multicast_address;
-		record->sources = sources;
-		record->filter_mode = EXCLUDE;
-	}else{
-		if(record->filter_mode == INCLUDE){
-			// if sources in record, remove them
-			Vector<IPAddress>::iterator it;
-			for(it = record->sources.begin();it != record->sources.end();it++){
-				for(int j = 0;j < sources.size();j++){
-					if(*it == sources.at(j)){
-						// Source is already in record, so remove it
-						// TODO: does this work????
-						record->sources.erase(it);
-						it++;
-					}
-				}
-			}
-		}else if(record->filter_mode == EXCLUDE){
-
-		}else{
-			click_chatter("Wrong exclude sources mode");
-		}
-	}
-}
 
 int IGMPClient::includeSourcesHandler(const String &conf, Element *e, void * thunk, ErrorHandler * errh){
 	IGMPClient* me = (IGMPClient *) e;
@@ -104,25 +39,26 @@ int IGMPClient::includeSourcesHandler(const String &conf, Element *e, void * thu
 	Vector<IPAddress> sources = p.sources(conf, errh);
 	IPAddress multicast_address = p.multicastAddress(conf, errh);
 
-	me->includeSources(multicast_address, sources);
+	me->reporter.toIN(multicast_address, sources, 2);
 
 	return 0;
 }
 
-int IGMPClient::excludeSources(const String &conf, Element *e, void * thunk, ErrorHandler * errh){
+int IGMPClient::excludeSourcesHandler(const String &conf, Element *e, void * thunk, ErrorHandler * errh){
 	IGMPClient* me = (IGMPClient *) e;
 	ConfigParse p;
 
 	Vector<IPAddress> sources = p.sources(conf, errh);
 	IPAddress multicast_address = p.multicastAddress(conf, errh);
 
-	me->excludeSources(multicast_address, sources);
+	me->reporter.toEX(multicast_address, sources, 2);
 
 	return 0;
 }
 
 void IGMPClient::add_handlers(){
 	add_write_handler("include_sources", &includeSourcesHandler, (void *)0);
+	add_write_handler("exclude_sources", &excludeSourcesHandler, (void *)0);
 }
 
 Vector<IPAddress> ConfigParse::sources(const String &conf, ErrorHandler * errh){
@@ -135,9 +71,10 @@ Vector<IPAddress> ConfigParse::sources(const String &conf, ErrorHandler * errh){
 	if(Args(errh)
 	.push_back_args(conf)
 	.read_m("M", multicast_address)
-	.read_m("S", sources_string)
+	.read("S", sources_string)
 	.complete() < 0){
-		click_chatter("Failed reading include sources");
+		click_chatter("Failed reading sources");
+		assert(false && "Failed reading  sources");
 
 		return sources;
 	}
@@ -170,9 +107,10 @@ IPAddress ConfigParse::multicastAddress(const String &conf, ErrorHandler * errh)
 	if(Args(errh)
 	.push_back_args(conf)
 	.read_m("M", multicast_address)
-	.read_m("S", sources_string)
+	.read("S", sources_string)
 	.complete() < 0){
-		click_chatter("Failed reading include sources");
+		click_chatter("Failed reading  sources");
+		assert(false && "Failed reading  sources");
 
 		return IPAddress("0.0.0.0");
 	}

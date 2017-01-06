@@ -45,7 +45,7 @@ struct grouprecord{
 
 enum filtermode {INCLUDE, EXCLUDE};
 
-struct interfacerecord{
+struct Record{
     IPAddress multicast_address;
     Vector<IPAddress> sources;
     filtermode filter_mode;
