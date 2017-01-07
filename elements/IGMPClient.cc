@@ -152,9 +152,15 @@ int IGMPClient::excludeSourcesHandler(const String &conf, Element *e, void * thu
 	return 0;
 }
 
+String IGMPClient::getDBHandler(Element *e, void * thunk){
+    IGMPClient* me = (IGMPClient *) e;
+    return me->db->toString();
+}
+
 void IGMPClient::add_handlers(){
 	add_write_handler("include_sources", &includeSourcesHandler, (void *)0);
 	add_write_handler("exclude_sources", &excludeSourcesHandler, (void *)0);
+    add_read_handler("get_db", &getDBHandler, (void *)0);
 }
 
 Vector<IPAddress> ConfigParse::sources(const String &conf, ErrorHandler * errh){

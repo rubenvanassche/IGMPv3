@@ -24,7 +24,7 @@ class IGMPClient : public Element {
 		void run_timer(Timer*);
 
 		const char *class_name() const { return "IGMPClient"; }
-		const char *port_count() const { return "1/1"; }
+		const char *port_count() const { return "0/1"; }
 		const char *processing() const { return PUSH; }
 
 		void push(Packet *p);
@@ -39,6 +39,9 @@ class IGMPClient : public Element {
 		// Use: M {IPAdresss}, S {IPADRESS}+{IPADRESS}
 		static int includeSourcesHandler(const String &conf, Element *e, void * thunk, ErrorHandler * errh);
 		static int excludeSourcesHandler(const String &conf, Element *e, void * thunk, ErrorHandler * errh);
+
+		static String getDBHandler(Element *e, void * thunk);
+
 		void add_handlers();
 	private:
 		Timer timer;

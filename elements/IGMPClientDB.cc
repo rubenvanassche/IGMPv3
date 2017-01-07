@@ -8,9 +8,10 @@ IGMPClientDB::IGMPClientDB() { };
 IGMPClientDB::~IGMPClientDB() { };
 
 
-void IGMPClientDB::print(){
-	click_chatter("IGMPClientDB");
-	click_chatter("------------");
+String IGMPClientDB::toString(){
+	String out;
+	out += "IGMPClientDB\n";
+	out += "------------\n";
 
 	for(int i = 0;i < this->records.size();i++){
 		Record* record = this->records.at(i);
@@ -22,12 +23,16 @@ void IGMPClientDB::print(){
 			ie = "(E)";
 		}
 
-		click_chatter("%s - %s", ie.c_str(), record->multicast_address.s().c_str());
+		out += ie + " - " + record->multicast_address.s().c_str() + "\n";
 		for(int j = 0;j < record->sources.size();j++){
 			IPAddress ip = record->sources.at(j);
-			click_chatter("   %s", ip.s().c_str());
+			out += "    ";
+			out +=  ip.s().c_str();
+			out += "\n";
 		}
 	}
+
+	return out;
 }
 
 void IGMPClientDB::includeSources(IPAddress multicast_address, Vector<IPAddress> sources){

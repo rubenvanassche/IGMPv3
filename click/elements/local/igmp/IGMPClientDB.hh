@@ -40,7 +40,7 @@ class IGMPClientDB : public Element {
 
 
 		// Print the database
-		void print();
+		String toString();
 
 		void includeSources(IPAddress multicast_address, Vector<IPAddress> sources);
 		void excludeSources(IPAddress multicast_address, Vector<IPAddress> sources);

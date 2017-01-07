@@ -13,7 +13,7 @@ app:
 	cd click/apps/ClickController; java ClickController localhost 1981
 
 test:
-	cd click; userlevel/click ../scripts/test/handler.click -p 1981
+	cd click; userlevel/click ../scripts/test/router.click -p 1981
 
 run:
 	cd click; userlevel/click ../scripts/ipnetwork.click -p 1981
