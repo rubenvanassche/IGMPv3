@@ -26,11 +26,14 @@ public:
     const char *port_count() const { return "0/1"; }
     const char *processing() const { return AGNOSTIC; }
 
-	void isINCLUDE();
-	void isEXCLUDE();
+	void isINCLUDE(IPAddress multicast_address, int robustnessVariable);
+	void isEXCLUDE(IPAddress multicast_address, int robustnessVariable);
 
 	void toEX(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
 	void toIN(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
+
+	void block(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
+	void allow(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
 
 	grouprecord* generateRecord(uint8_t type, IPAddress multicast_address, Vector<IPAddress>& sources);
 

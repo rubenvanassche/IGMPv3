@@ -17,12 +17,19 @@ grouprecord* ReportIGMPElement::generateRecord(uint8_t type, IPAddress multicast
    return record;
 }
 
-void ReportIGMPElement::toEX(IPAddress  multicast_address, Vector<IPAddress>& sources, int robustnessVariable = 2){
-    grouprecord* record = this->generateRecord(0x04, multicast_address, sources);
+void ReportIGMPElement::isINCLUDE(IPAddress multicast_address, int robustnessVariable){
+    Vector<IPAddress> sources;
+    grouprecord* record = this->generateRecord(0x01, multicast_address, sources);
 
     this->recordsTable.set(record, robustnessVariable);
 }
 
+void ReportIGMPElement::isEXCLUDE(IPAddress multicast_address, int robustnessVariable){
+    Vector<IPAddress> sources;
+    grouprecord* record = this->generateRecord(0x02, multicast_address, sources);
+
+    this->recordsTable.set(record, robustnessVariable);
+}
 
 void ReportIGMPElement::toIN(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable = 2){
     grouprecord* record = this->generateRecord(0x03, multicast_address, sources);
@@ -30,6 +37,23 @@ void ReportIGMPElement::toIN(IPAddress multicast_address, Vector<IPAddress>& sou
     this->recordsTable.set(record, robustnessVariable);
 }
 
+void ReportIGMPElement::toEX(IPAddress  multicast_address, Vector<IPAddress>& sources, int robustnessVariable = 2){
+    grouprecord* record = this->generateRecord(0x04, multicast_address, sources);
+
+    this->recordsTable.set(record, robustnessVariable);
+}
+
+void ReportIGMPElement::allow(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable){
+    grouprecord* record = this->generateRecord(0x05, multicast_address, sources);
+
+    this->recordsTable.set(record, robustnessVariable);
+}
+
+void ReportIGMPElement::block(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable){
+    grouprecord* record = this->generateRecord(0x06, multicast_address, sources);
+
+    this->recordsTable.set(record, robustnessVariable);
+}
 
 int ReportIGMPElement::calculateGrouprecordSize(grouprecord* record){
     int totalSize = 0;

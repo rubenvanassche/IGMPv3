@@ -212,12 +212,22 @@ Record* IGMPClientDB::getRecord(IPAddress multicast_address){
 
 	return nullptr;
 }
+int IGMPClientDB::addRecord(IPAddress multicast_address, Vector<IPAddress> sources, filtermode mode){
+	Record* record = new Record;
+	record->multicast_address = multicast_address;
+	record->sources = sources;
+	record->filter_mode = mode;
+
+	this->records.push_back(record);
+}
 int IGMPClientDB::setMode(IPAddress multicast_address, filtermode mode){
 	Record* record = this->getRecord(multicast_address);
 
 	if(record == nullptr){
 		return -1;
 	}
+
+	record->filter_mode = mode;
 
 	return 0;
 }

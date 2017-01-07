@@ -29,6 +29,11 @@ class IGMPClient : public Element {
 
 		void push(Packet *p);
 
+		void includeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources);
+		void includeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources);
+		void excludeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources);
+		void excludeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources);
+
 		// Handlers
 		// Use: M {IPAdresss}, S {IPADRESS}
 		// Use: M {IPAdresss}, S {IPADRESS}+{IPADRESS}
@@ -46,6 +51,12 @@ public:
     Vector<IPAddress> sources(const String &conf, ErrorHandler * errh);
     IPAddress multicastAddress(const String &conf, ErrorHandler * errh);
 };
+
+// Vector Operations
+Vector<IPAddress> vectorsUnion(Vector<IPAddress> a, Vector<IPAddress> b);
+Vector<IPAddress> vectorsIntersection(Vector<IPAddress> a, Vector<IPAddress> b);
+Vector<IPAddress> vectorsMinus(Vector<IPAddress> a, Vector<IPAddress> b);
+Vector<IPAddress> vectorsUnique(Vector<IPAddress> a);
 
 CLICK_ENDDECLS
 
