@@ -220,6 +220,33 @@ int IGMPClientDB::addRecord(IPAddress multicast_address, Vector<IPAddress> sourc
 
 	this->records.push_back(record);
 }
+bool IGMPClientDB::acceptFromSource(IPAddress multicast_address, IPAddress source){
+	Record* record = this->getRecord(multicast_address);
+
+	if(record == nullptr){
+		return false;
+	}
+
+	bool inSourceList = false;
+	for(int i = 0;i < record->sources.size();i++){
+		if(record->sources.at(i) == source){
+			inSourceList = true;
+			break;
+		}
+	}
+
+	if(record->filter_mode == INCLUDE and inSourceList == true){
+		return true;
+	}else if(record->filter_mode == INCLUDE and inSourceList == false){
+		return false;
+	}else if(record->filter_mode == EXCLUDE and inSourceList == true){
+		return false;
+	}else if(record->filter_mode == EXCLUDE and inSourceList == false){
+		return true;
+	}else{
+		return false;
+	}
+}
 int IGMPClientDB::setMode(IPAddress multicast_address, filtermode mode){
 	Record* record = this->getRecord(multicast_address);
 

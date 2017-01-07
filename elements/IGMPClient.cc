@@ -12,6 +12,18 @@ int IGMPClient::configure(Vector<String> &conf, ErrorHandler *errh) {
     // init timer
     timer.initialize(this);
     timer.schedule_after_msec(1000);
+
+    // Set the database
+    IGMPClientDB* tempDb;
+    int res = cp_va_kparse(conf, this, errh,
+         "DB", 0, cpElementCast, "IGMPClientDB", &tempDb, cpEnd);
+
+    if(res < 0){
+        return res; // parsing failed
+    }
+
+    this->db = tempDb;
+
     return 0;
 }
 
@@ -53,7 +65,7 @@ void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddres
 
     //Vector<IPAddress> unions = vectorsUnion(oldSources, sources);
     click_chatter("IN -> EX");
-    this->db.setMode(multicast_address, EXCLUDE);
+    this->db->setMode(multicast_address, EXCLUDE);
     this->reporter.toEX(multicast_address, sources, 2);
 }
 void IGMPClient::includeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources){
@@ -65,7 +77,7 @@ void IGMPClient::excludeWithExclude(IPAddress multicast_address, Vector<IPAddres
     click_chatter("EX -> EX(not impelemented)");
 }
 void IGMPClient::excludeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources){
-    this->db.setMode(multicast_address, INCLUDE);
+    this->db->setMode(multicast_address, INCLUDE);
     this->reporter.toIN(multicast_address, sources, 2);
     click_chatter("EX -> IN");
 }
@@ -88,13 +100,13 @@ int IGMPClient::includeSourcesHandler(const String &conf, Element *e, void * thu
 	Vector<IPAddress> sources;
 	IPAddress multicast_address = p.multicastAddress(conf, errh);
 
-    if(!me->db.recordExists(multicast_address)){
-        me->db.addRecord(multicast_address, sources, INCLUDE);
+    if(!me->db->recordExists(multicast_address)){
+        me->db->addRecord(multicast_address, sources, INCLUDE);
         me->excludeWithInclude(multicast_address, sources);
         return 0;
     }
 
-    filtermode mode = me->db.getMode(multicast_address);
+    filtermode mode = me->db->getMode(multicast_address);
 
     if(mode == INCLUDE){
         me->includeWithInclude(multicast_address, sources);
@@ -123,13 +135,13 @@ int IGMPClient::excludeSourcesHandler(const String &conf, Element *e, void * thu
 	Vector<IPAddress> sources;
 	IPAddress multicast_address = p.multicastAddress(conf, errh);
 
-    if(!me->db.recordExists(multicast_address)){
-        me->db.addRecord(multicast_address, sources, EXCLUDE);
+    if(!me->db->recordExists(multicast_address)){
+        me->db->addRecord(multicast_address, sources, EXCLUDE);
         me->includeWithExclude(multicast_address, sources);
         return 0;
     }
 
-    filtermode mode = me->db.getMode(multicast_address);
+    filtermode mode = me->db->getMode(multicast_address);
 
     if(mode == INCLUDE){
         me->includeWithExclude(multicast_address, sources);

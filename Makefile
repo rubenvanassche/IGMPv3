@@ -14,3 +14,6 @@ app:
 
 test:
 	cd click; userlevel/click ../scripts/test/handler.click -p 1981
+
+run:
+	cd click; userlevel/click ../scripts/ipnetwork.click -p 1981

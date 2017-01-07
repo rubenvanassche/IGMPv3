@@ -56,6 +56,9 @@ class IGMPClientDB : public Element {
 		Record* getRecord(IPAddress multicast_address);
 		int addRecord(IPAddress multicast_address, Vector<IPAddress> sources, filtermode mode);
 
+		// Check if this should be accepted as source
+		bool acceptFromSource(IPAddress multicast_address, IPAddress source);
+
 		int setMode(IPAddress multicast_address, filtermode mode);
 
 		Vector<IPAddress> getSources(IPAddress multicast_address);
