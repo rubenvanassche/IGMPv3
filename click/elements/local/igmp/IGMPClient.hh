@@ -47,6 +47,7 @@ class IGMPClient : public Element {
 		Timer timer;
 		ReportIGMPElement reporter;
 		IGMPClientDB* db;
+		IPAddress ipAddress;
 };
 
 class ConfigParse{

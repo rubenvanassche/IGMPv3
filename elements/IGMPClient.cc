@@ -15,13 +15,18 @@ int IGMPClient::configure(Vector<String> &conf, ErrorHandler *errh) {
 
     // Set the database
     IGMPClientDB* tempDb;
+    IPAddress* addr = new IPAddress("1.1.1.1");
+
     int res = cp_va_kparse(conf, this, errh,
-         "DB", 0, cpElementCast, "IGMPClientDB", &tempDb, cpEnd);
+        "ADDR", 0, cpIPAddress, addr,
+         "DB", 0, cpElementCast, "IGMPClientDB", &tempDb,
+        cpEnd);
 
     if(res < 0){
-        return res; // parsing failed
+        return -1; // parsing failed
     }
 
+    this->ipAddress = IPAddress(*addr);
     this->db = tempDb;
 
     return 0;

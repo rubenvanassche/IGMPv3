@@ -1,6 +1,6 @@
 elementclass IGMP {
     db::IGMPClientDB;
-    source::IGMPClient(DB db);
+    source::IGMPClient(DB db, ADDR 192.168.1.1);
 
     source
         -> IPEncap(4, 192.168.1.254	, 224.0.0.1, TTL 1, PROTO 2)
