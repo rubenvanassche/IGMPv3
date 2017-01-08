@@ -68,5 +68,27 @@ Vector<IPAddress> IGMPRouterDB::acceptFromSource(IPAddress multicast_address, IP
 	return accepted;
 }
 
+bool IGMPRouterDB::acceptFromSourceAsClient(IPAddress multicast_address, IPAddress source, IPAddress client_address, IPAddress client_address_mask){
+	HashTable<IPAddress, IGMPClientDB*>::iterator it;
+	Vector<IPAddress> accepted;
+
+	for(it = this->dbs.begin();it != this->dbs.end();it++){
+		IPAddress client = it->first;
+		IGMPClientDB* clientDb = it->second;
+
+		if(client.matches_prefix(client_address, client_address_mask) == false){
+			continue;
+		}
+
+
+
+		if(clientDb->acceptFromSource(multicast_address, source)){
+			return true;
+		}
+	}
+
+	return false;
+}
+
 CLICK_ENDDECLS
 EXPORT_ELEMENT(IGMPRouterDB)

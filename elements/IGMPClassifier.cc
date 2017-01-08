@@ -31,15 +31,15 @@ Packet* IGMPClassifier::simple_action(Packet *p) {
 	if(ipHeader->ip_p == 2){
 		// IGMP
 		output(2).push(p);
-		click_chatter("IGMP");
+		//click_chatter("IGMP");
         return 0;
 	}
 
 	if(this->db->acceptFromSource(destination, source)){
-        click_chatter("MULTICAST");
+        //click_chatter("MULTICAST");
 		output(1).push(p);
 	}else{
-        click_chatter("UNICAST");
+        //click_chatter("UNICAST");
 		output(0).push(p);
 	}
 

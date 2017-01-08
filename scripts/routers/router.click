@@ -20,7 +20,20 @@ elementclass Router {
 	igmpRouter::IGMPRouter(DB igmpDB);
 	igmpClassifier::IGMPRouterClassifier(DB igmpDB);
 
+	igmpPacketCopy::Tee(2);
+
+	client1_igmpRouterSender::IGMPRouterSender(DB igmpDB, ADDR $client1_address:ipnet);
+	client2_igmpRouterSender::IGMPRouterSender(DB igmpDB, ADDR $client2_address:ipnet);
+
 	igmpClassifier[2] -> igmpRouter;
+	igmpClassifier[1] -> igmpPacketCopy;
+
+	igmpPacketCopy[0]->client1_igmpRouterSender;
+	igmpPacketCopy[1]->client2_igmpRouterSender;
+
+	client1_igmpRouterSender ->  EtherEncap(0x0800, $client1_address:ether, FF:FF:FF:FF:FF:FF) -> [1]output;
+	client2_igmpRouterSender -> EtherEncap(0x0800, $client2_address:ether, FF:FF:FF:FF:FF:FF)  	-> [2]output;
+
 	igmpRouter[0] -> Discard;
 
 

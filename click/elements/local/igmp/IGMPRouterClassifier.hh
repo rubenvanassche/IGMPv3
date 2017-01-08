@@ -9,7 +9,7 @@ CLICK_DECLS
 /*
 =c
 
-Classifies packets, IGMP reports are set on output 1 and all other trafic on port 0
+Classifies packets, IGMP reports are set on output 2, multicast traffic on port 1, and all other traffic on port 0
 
 IGMPRouterClassifier(TODO)
 
@@ -32,7 +32,7 @@ class IGMPRouterClassifier : public Element {
 		int configure(Vector<String>&, ErrorHandler*);
 
 		const char *class_name() const { return "IGMPRouterClassifier"; }
-		const char *port_count() const { return "1/2"; }
+		const char *port_count() const { return "1/3"; }
 		const char *processing() const { return PUSH; }
 
 		Packet * simple_action(Packet *p);

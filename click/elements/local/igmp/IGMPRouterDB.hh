@@ -44,6 +44,9 @@ class IGMPRouterDB : public Element {
 		// get all the clients who want a multicast packet from this source
 		Vector<IPAddress> acceptFromSource(IPAddress multicast_address, IPAddress source);
 
+		// get all the clients who want a multicast packet from this source for a specified client
+		bool acceptFromSourceAsClient(IPAddress multicast_address, IPAddress source, IPAddress client_address, IPAddress client_address_mask);
+
 		Packet *simple_action(Packet *p);
 	private:
 		HashTable<IPAddress, IGMPClientDB*> dbs;

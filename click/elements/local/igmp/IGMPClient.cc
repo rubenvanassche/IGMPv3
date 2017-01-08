@@ -60,7 +60,7 @@ void IGMPClient::push(Packet *p) {
 		return;
 	}
 
-	click_chatter("Packet send");
+	//click_chatter("Packet send");
 	output(0).push(packet);
 };
 
@@ -69,7 +69,7 @@ void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddres
     //Vector<IPAddress> oldSources = this->db.getRecord(multicast_address)->sources;
 
     //Vector<IPAddress> unions = vectorsUnion(oldSources, sources);
-    click_chatter("IN -> EX");
+    //click_chatter("IN -> EX");
     this->db->setMode(multicast_address, EXCLUDE);
     this->reporter.toEX(multicast_address, sources, 2);
 }
@@ -84,7 +84,7 @@ void IGMPClient::excludeWithExclude(IPAddress multicast_address, Vector<IPAddres
 void IGMPClient::excludeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources){
     this->db->setMode(multicast_address, INCLUDE);
     this->reporter.toIN(multicast_address, sources, 2);
-    click_chatter("EX -> IN");
+    //click_chatter("EX -> IN");
 }
 
 int IGMPClient::includeSourcesHandler(const String &conf, Element *e, void * thunk, ErrorHandler * errh){
