@@ -3,23 +3,12 @@
 // Packets for the network are put on output 0
 // Packets for the host are put on output 1
 
-elementclass IGMP {
-    $db |
-    source::IGMPClient(DB $db);
-
-    source
-        -> IPEncap(4, 192.168.1.254	, 224.0.0.1, TTL 1, PROTO 2)
-    	-> EtherEncap(0x0800, 1A:7C:3E:90:78:41, 1A:7C:3E:90:78:42)
-        -> [0]output;
-
-	input[0] -> source
-}
 
 elementclass Client {
 	$address, $gateway |
 
 	igmpDB::IGMPClientDB;
-	igmpClient::IGMP(igmpDB);
+	igmpClient::IGMPClient(DB igmpDB);
 	igmpClassifier::IGMPClassifier(DB igmpDB);
 
 	ip :: Strip(14)
@@ -56,9 +45,11 @@ elementclass Client {
 	igmpClassifier[1] -> [1]output;
 
 	// IGMP Message
-	igmpClassifier[2] -> igmpClient;
+	igmpClassifier[2] -> Discard;
 
-	igmpClient -> Discard;
+	igmpClient -> IPEncap(4, $address:ip, 224.0.0.22, TTL 1, PROTO 2)
+               -> EtherEncap(0x0800, $address:ether, FF:FF:FF:FF:FF:FF)
+               -> [0]output;
 
 	// Incoming Packets
 	input

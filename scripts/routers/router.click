@@ -15,9 +15,19 @@
 elementclass Router {
 	$server_address, $client1_address, $client2_address |
 
+	// IGMP elements
+	igmpDB::IGMPRouterDB();
+	igmpRouter::IGMPRouter(DB igmpDB);
+	igmpClassifier::IGMPRouterClassifier(DB igmpDB);
+
+	igmpClassifier[2] -> igmpRouter;
+	igmpRouter[0] -> Discard;
+
+
 	// Shared IP input path and routing table
 	ip :: Strip(14)
 		-> CheckIPHeader
+		-> igmpClassifier
 		-> rt :: StaticIPLookup(
 					$server_address:ip/32 0,
 					$client1_address:ip/32 0,
@@ -25,10 +35,10 @@ elementclass Router {
 					$server_address:ipnet 1,
 					$client1_address:ipnet 2,
 					$client2_address:ipnet 3);
-	
+
 	// ARP responses are copied to each ARPQuerier and the host.
 	arpt :: Tee (3);
-	
+
 	// Input and output paths for interface 0
 	input
 		-> HostEtherFilter($server_address)
@@ -82,11 +92,11 @@ elementclass Router {
 	client2_class[2]
 		-> Paint(3)
 		-> ip;
-	
+
 	// Local delivery
 	rt[0]
 		-> [3]output
-	
+
 	// Forwarding paths per interface
 	rt[1]
 		-> DropBroadcasts
@@ -96,7 +106,7 @@ elementclass Router {
 		-> server_ttl :: DecIPTTL
 		-> server_frag :: IPFragmenter(1500)
 		-> server_arpq;
-	
+
 	server_paint[1]
 		-> ICMPError($server_address, redirect, host)
 		-> rt;
@@ -112,7 +122,7 @@ elementclass Router {
 	server_frag[1]
 		-> ICMPError($server_address, unreachable, needfrag)
 		-> rt;
-	
+
 
 	rt[2]
 		-> DropBroadcasts
@@ -122,7 +132,7 @@ elementclass Router {
 		-> client1_ttl :: DecIPTTL
 		-> client1_frag :: IPFragmenter(1500)
 		-> client1_arpq;
-	
+
 	client1_paint[1]
 		-> ICMPError($client1_address, redirect, host)
 		-> rt;
@@ -148,7 +158,7 @@ elementclass Router {
 		-> client2_ttl :: DecIPTTL
 		-> client2_frag :: IPFragmenter(1500)
 		-> client2_arpq;
-	
+
 	client2_paint[1]
 		-> ICMPError($client2_address, redirect, host)
 		-> rt;
@@ -165,4 +175,3 @@ elementclass Router {
 		-> ICMPError($client2_address, unreachable, needfrag)
 		-> rt;
 }
-

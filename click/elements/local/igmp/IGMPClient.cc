@@ -26,11 +26,8 @@ int IGMPClient::configure(Vector<String> &conf, ErrorHandler *errh) {
         return -1; // parsing failed
     }
 
-
     this->ipAddress = IPAddress(*addr);
     this->db = tempDb;
-
-    click_chatter("%s", this->ipAddress.s().c_str());
 
     return 0;
 }
