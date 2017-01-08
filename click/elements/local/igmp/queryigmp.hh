@@ -23,15 +23,13 @@ public:
     const char *port_count() const { return "0/1"; }
     const char *processing() const { return PUSH; }
 
-    int configure(Vector<String>&, ErrorHandler*);
 
-	void run_timer(Timer*);
+	Packet* generalQuery();
+	Packet* groupQuery(IPAddress multicast_address);
+
+	Packet* generatePacket(IPAddress multicast_address);
 
     void push(int, Packet*);
-private:
-    uint32_t maxSize;
-	Vector<IPAddress> sourcesVector;
-	Timer timer;
 };
 CLICK_ENDDECLS
 

@@ -33,15 +33,14 @@ Packet* IGMPClassifier::simple_action(Packet *p) {
 		output(2).push(p);
 		//click_chatter("IGMP");
         return 0;
-	}
-
-	if(this->db->acceptFromSource(destination, source)){
+    }
+    if(this->db->acceptFromSource(destination, source)){
         //click_chatter("MULTICAST");
-		output(1).push(p);
-	}else{
+        output(1).push(p);
+    }else{
         //click_chatter("UNICAST");
-		output(0).push(p);
-	}
+        output(0).push(p);
+    }
 
     return 0;
 };

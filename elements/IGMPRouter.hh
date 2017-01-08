@@ -1,8 +1,10 @@
 #ifndef CLICK_IGMPROUTER_HH
 #define CLICK_IGMPROUTER_HH
 #include <click/element.hh>
+#include <click/timer.hh>
 #include "IGMPRouterDB.hh"
 #include "ProcessReport.hh"
+#include "queryigmp.hh"
 
 CLICK_DECLS
 
@@ -29,6 +31,8 @@ class IGMPRouter : public Element {
 
 		int configure(Vector<String>&, ErrorHandler*);
 
+		void run_timer(Timer*);
+
 		const char *class_name() const { return "IGMPRouter"; }
 		const char *port_count() const { return "1/1"; }
 		const char *processing() const { return AGNOSTIC; }
@@ -51,6 +55,8 @@ class IGMPRouter : public Element {
 		void add_handlers();
 	private:
 		IGMPRouterDB* db;
+		QueryIGMPElement queryr;
+		Timer timer;
 };
 
 CLICK_ENDDECLS

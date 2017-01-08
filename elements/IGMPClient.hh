@@ -13,7 +13,6 @@ template class Vector<SomeThing>;
 #endif
 
 CLICK_DECLS
-
 class IGMPClient : public Element {
 	public:
 		IGMPClient();

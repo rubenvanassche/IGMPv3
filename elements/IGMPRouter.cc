@@ -4,10 +4,13 @@
 
 CLICK_DECLS
 
-IGMPRouter::IGMPRouter() { };
+IGMPRouter::IGMPRouter() : timer(this){ };
 IGMPRouter::~IGMPRouter() { };
 
 int IGMPRouter::configure(Vector<String> &conf, ErrorHandler *errh) {
+    timer.initialize(this);
+    timer.schedule_after_msec(10000);
+
     // Set the database
     IGMPRouterDB* tempDb;
     int res = cp_va_kparse(conf, this, errh,
@@ -21,6 +24,12 @@ int IGMPRouter::configure(Vector<String> &conf, ErrorHandler *errh) {
 
     return 0;
 }
+
+void IGMPRouter::run_timer(Timer* t){
+    this->simple_action(nullptr);
+     timer.schedule_after_msec(10000);
+}
+
 
 int IGMPRouter::isINCLUDE(IPAddress client_address, IPAddress multicast_address){
     click_chatter("isIN");
@@ -109,10 +118,17 @@ int IGMPRouter::processReport(Packet *p){
     }
 }
 
-Packet *IGMPRouter::simple_action(Packet *p) {
-	this->processReport(p);
 
-	return p;
+Packet *IGMPRouter::simple_action(Packet *p) {
+    if(p == nullptr){
+        // Time to send
+        p = queryr.generalQuery();
+
+        output(0).push(p);
+        return p;
+    }else{
+        this->processReport(p);
+    }
 }
 
 String IGMPRouter::getDBHandler(Element *e, void * thunk){

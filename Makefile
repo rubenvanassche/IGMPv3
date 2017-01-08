@@ -1,4 +1,4 @@
-all: build test
+all: build run
 
 build: copy
 	cd click; make elemlist; make -j2

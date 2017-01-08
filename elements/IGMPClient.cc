@@ -62,7 +62,7 @@ void IGMPClient::push(Packet *p) {
 
 	//click_chatter("Packet send");
 	output(0).push(packet);
-};
+}
 
 void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources){
 
