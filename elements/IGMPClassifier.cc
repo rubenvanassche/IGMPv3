@@ -29,10 +29,14 @@ Packet* IGMPClassifier::simple_action(Packet *p) {
 	IPAddress source = IPAddress(ipHeader->ip_src);
 
 	if(ipHeader->ip_p == 2){
-		// IGMP
-		output(2).push(p);
-		//click_chatter("IGMP");
-        return 0;
+		// IGMP Query
+		unsigned char * igmpbegin = (unsigned char *)p->data()+sizeof(click_ip);
+		igmpv3query* format = (igmpv3query*)igmpbegin;
+
+        if(format->type == 0x11){
+            output(2).push(p);
+        }
+
     }
     if(this->db->acceptFromSource(destination, source)){
         //click_chatter("MULTICAST");
@@ -42,7 +46,6 @@ Packet* IGMPClassifier::simple_action(Packet *p) {
         output(0).push(p);
     }
 
-    return 0;
 };
 
 CLICK_ENDDECLS

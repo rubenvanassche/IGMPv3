@@ -35,7 +35,7 @@ class IGMPClassifier : public Element {
 		const char *port_count() const { return "1/3"; }
 		const char *processing() const { return PUSH; }
 
-		Packet * simple_action(Packet *p);
+		Packet* simple_action(Packet *p);
 	private:
 		IGMPClientDB* db;
 };
