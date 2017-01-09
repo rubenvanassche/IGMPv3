@@ -6,43 +6,29 @@
 
 CLICK_DECLS
 
-QueryIGMPElement::QueryIGMPElement(): timer(this){}
+QueryIGMPElement::QueryIGMPElement(){}
 QueryIGMPElement::~QueryIGMPElement(){}
 
-int QueryIGMPElement::configure(Vector<String> &conf, ErrorHandler *errh) {
-    // Let's add some IP addressess hard coded(MUST BE REMOVED)
-    sourcesVector.push_back(IPAddress("192.168.1.1"));
-    sourcesVector.push_back(IPAddress("192.168.1.2"));
 
-    // init timer
-    timer.initialize(this);
-    timer.schedule_after_msec(1000);
-    return 0;
+Packet* QueryIGMPElement::generalQuery(){
+    IPAddress zero("0.0.0.0");
+    return this->generatePacket(zero);
 }
 
-void QueryIGMPElement::run_timer(Timer* t){
-    click_chatter("we are now 1 second later");
-    timer.schedule_after_msec(1000);
-    this->push(0, nullptr);
+Packet* QueryIGMPElement::groupQuery(IPAddress multicast_address){
+    return this->generatePacket(multicast_address);
 }
 
-/**
- * [QueryIGMPElement::push description]
- * @param int
- * @param r
- *
- * Generates an IGMP Query Message, should be wrapped in an IP package with destination 224.0.0.1 or 224.0.0.22(see RFC)
- *
- */
-void QueryIGMPElement::push(int, Packet *r){
-    IPAddress group = IPAddress("1.2.3.4");
+Packet* QueryIGMPElement::generatePacket(IPAddress multicast_address){
+    Vector<IPAddress> sourcesVector; // Empty for now
 
     int packetsize = sizeof(igmpv3query);
     int sourcesSize = sourcesVector.size() * sizeof(in_addr); // Allocate space for IP Adresses
 
     WritablePacket *packet = Packet::make(0,0,packetsize + sourcesSize, 0);
     if(packet == 0 ){
-        return click_chatter( "cannot make igmpv3query packet!");
+        click_chatter( "cannot make igmpv3query packet!");
+        return nullptr;
     }
     memset(packet->data(), 0, packet->length());
 
@@ -55,7 +41,7 @@ void QueryIGMPElement::push(int, Packet *r){
     // Checksum will be calculated later
     format->checksum = 0x0000;
     // The address of the multicast group
-    format->group_address = group.addr();
+    format->group_address = multicast_address.addr();
     // TODO: querier robustness value (qrv) instructs the host to send all messages qrv times
     format->resv_and_s_and_qrv = 0x02;
     // TODO: this
@@ -70,7 +56,19 @@ void QueryIGMPElement::push(int, Packet *r){
     // Set the checksum
     format->checksum = click_in_cksum((unsigned char *)format, packet->length());
 
-    output(0).push(packet);
+    return packet;
+}
+
+/**
+ * [QueryIGMPElement::push description]
+ * @param int
+ * @param r
+ *
+ * Generates an IGMP Query Message, should be wrapped in an IP package with destination 224.0.0.1 or 224.0.0.22(see RFC)
+ *
+ */
+void QueryIGMPElement::push(int, Packet *r){
+
 }
 
 

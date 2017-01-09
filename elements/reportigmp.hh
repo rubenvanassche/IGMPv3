@@ -2,10 +2,12 @@
 #define CLICK_REPORTIGMPELEMENT_HH
 #include <click/element.hh>
 #include <click/vector.cc>
+#include <click/hashtable.hh>
 #include "packets.hh"
 
 #if EXPLICIT_TEMPLATE_INSTANCES
 template class Vector<SomeThing>;
+template class HashTable<SomeThing, OtherThing>;
 #endif
 CLICK_DECLS
 
@@ -22,25 +24,28 @@ public:
 
     const char *class_name() const { return "ReportIGMPElement"; }
     const char *port_count() const { return "0/1"; }
-    const char *processing() const { return PUSH; }
+    const char *processing() const { return AGNOSTIC; }
 
-    int configure(Vector<String>&, ErrorHandler*);
+	void isINCLUDE(IPAddress multicast_address, int robustnessVariable);
+	void isEXCLUDE(IPAddress multicast_address, int robustnessVariable);
 
-	void run_timer(Timer*);
+	void toEX(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
+	void toIN(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
+
+	void block(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
+	void allow(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
 
 	grouprecord* generateRecord(uint8_t type, IPAddress multicast_address, Vector<IPAddress>& sources);
 
-    void push(int, Packet*);
-private:
-	// Calculate the amount of bytes the group records array needs
-	int calculateGrouprecordsSize();
+	Packet* generatePacket(Vector<grouprecord*> records);
 
+    Packet* simple_action(int, Packet*);
+private:
 	// Calculate the amount of bytes a single group record needs
 	int calculateGrouprecordSize(grouprecord* record);
 
     uint32_t maxSize;
-	Vector<grouprecord*> grouprecordVector;
-	Timer timer;
+	HashTable<grouprecord*, int> recordsTable;
 };
 CLICK_ENDDECLS
 

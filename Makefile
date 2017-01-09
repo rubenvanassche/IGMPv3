@@ -1,4 +1,4 @@
-all: build test
+all: build run
 
 build: copy
 	cd click; make elemlist; make -j2
@@ -9,6 +9,11 @@ configure:
 copy:
 	cp -R elements/. click/elements/local/igmp
 
+app:
+	cd click/apps/ClickController; java ClickController localhost 1981
+
 test:
-	cd click; userlevel/click conf/test.click
-	cd click; userlevel/click ../scripts/test/setup.click
+	cd click; userlevel/click ../scripts/test/router.click -p 1981
+
+run:
+	cd click; userlevel/click ../scripts/ipnetwork.click -p 1981
