@@ -50,6 +50,26 @@ class IGMPClient : public Element {
 		ReportIGMPElement reporter;
 		IGMPClientDB* db;
 		IPAddress ipAddress;
+
+		struct TimerData{
+			IGMPClient* me;
+			int x;
+		};
+
+		static void handleExpiry(Timer*, void *);
+		void expire(TimerData*);
+
+		// Send report timer
+		struct SendReportTimerData{
+			IGMPClient* me;
+			Packet* report;
+		};
+
+		static void handleSendReportTimer(Timer*, void *);
+
+		// Variables
+		int unsolicited_report_interval = 1; // Send reports after x seconds random from [0, unsolicited_report_interval]
+		int robustness_variable = 2;
 };
 
 class ConfigParse{

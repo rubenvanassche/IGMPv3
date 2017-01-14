@@ -29,28 +29,67 @@ int IGMPClient::configure(Vector<String> &conf, ErrorHandler *errh) {
     this->ipAddress = IPAddress(*addr);
     this->db = tempDb;
 
+    // Timer test
+    TimerData* timerdata = new TimerData();
+    timerdata->x = 11;
+    timerdata->me = this;
+    Timer* t = new Timer(&IGMPClient::handleExpiry,timerdata);
+    t->initialize(this);
+    t->schedule_after_msec(2500);
+
     return 0;
+}
+
+
+void IGMPClient::handleExpiry(Timer*, void * data){
+    TimerData* timerdata = (TimerData*) data;
+    assert(timerdata); // the cast must be good
+    timerdata->me->expire(timerdata);
+}
+
+void IGMPClient::expire(TimerData* data){
+    TimerData* timerdata = (TimerData*) data;
+    click_chatter("TIMERDATA %i", timerdata->x);
 }
 
 void IGMPClient::run_timer(Timer* t){
     timer.schedule_after_msec(1000);
-    this->push(0, nullptr);
 }
 
 void IGMPClient::push(int port, Packet *p) {
-    if(p != nullptr){
-        // Recieve Query
-        //
+    if(p == nullptr){
+        return;
+    }
+
+    // Let's find out which packet p is
+    unsigned char * igmpbegin = 0;
+    igmpv3query* queryFormat = 0;
+    igmpv3report* reportFormat = 0;
+
+    // A report?
+    igmpbegin = (unsigned char *)p->data();
+    reportFormat = (igmpv3report*)igmpbegin;
+
+    if(reportFormat->type == 0x22){
+        // It is!
+        output(0).push(p);
+        return;
+    }
+
+    // A Query?
+    igmpbegin = (unsigned char *)p->data()+sizeof(click_ip);
+    queryFormat = (igmpv3query*)igmpbegin;
+
+    if(queryFormat->type == 0x11){
+        // It is!
         this->proccessQuery(p);
         p->kill();
-    }else{
-        // Send Report
-        Packet* p = this->reporter.simple_action(0, nullptr);
 
-        if(p != nullptr){
-            output(0).push(p);
-        }
+        return;
     }
+
+    click_chatter("Recieved an unkown packet");
+    return;
 }
 
 void IGMPClient::proccessQuery(Packet *p){
@@ -68,13 +107,23 @@ void IGMPClient::proccessQuery(Packet *p){
 }
 
 void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources){
-
-    //Vector<IPAddress> oldSources = this->db.getRecord(multicast_address)->sources;
-
-    //Vector<IPAddress> unions = vectorsUnion(oldSources, sources);
-    //click_chatter("IN -> EX");
     this->db->setMode(multicast_address, EXCLUDE);
-    this->reporter.toEX(multicast_address, sources, 2);
+
+    for(int i = 0;i < this->robustness_variable;i++){
+        int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
+        click_chatter("RE %i", reschedule);
+
+        SendReportTimerData* data = new SendReportTimerData();
+        data->report = this->reporter.toEX(multicast_address, sources);
+        data->me = this;
+
+        click_chatter("REPORT POINTER %p", data->report);
+
+        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
+        t->initialize(this);
+        t->schedule_after_msec(reschedule);
+    }
+
 }
 void IGMPClient::includeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources){
     // NEEDS NOT TE BE IMPLEMENTED
@@ -86,8 +135,27 @@ void IGMPClient::excludeWithExclude(IPAddress multicast_address, Vector<IPAddres
 }
 void IGMPClient::excludeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources){
     this->db->setMode(multicast_address, INCLUDE);
-    this->reporter.toIN(multicast_address, sources, 2);
-    //click_chatter("EX -> IN");
+
+    for(int i = 0;i < this->robustness_variable;i++){
+        int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
+        click_chatter("RE %i", reschedule);
+
+        SendReportTimerData* data = new SendReportTimerData();
+        data->report = this->reporter.toIN(multicast_address, sources);
+        data->me = this;
+
+        click_chatter("REPORT POINTER %p", data->report);
+
+        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
+        t->initialize(this);
+        t->schedule_after_msec(reschedule);
+    }
+}
+
+void IGMPClient::handleSendReportTimer(Timer*, void * data){
+    SendReportTimerData* timerdata = (SendReportTimerData*) data;
+    assert(timerdata); // the cast must be good
+    timerdata->me->push(0, timerdata->report);
 }
 
 int IGMPClient::includeSourcesHandler(const String &conf, Element *e, void * thunk, ErrorHandler * errh){

@@ -51,5 +51,27 @@ struct Record{
     filtermode filter_mode;
 };
 
+/*
+// get a time(in seconds) and convert it to a IGMP format
+uint8_t convertTimeToUint(float in){
+    return (uint8_t) in;
+}
+
+// get a time(in seconds) and convert it to a IGMP format
+uint8_t convertTimeToUint(unsigned int in){
+    if(in >= 128){
+        // If >= 128 use exponent + mantisse
+        return convertTimeToUint((float) in);
+    }
+
+    return in;
+}
+
+// get an IGMP time format and convert it to a float representing seconds
+float convertTimeToFloat(uint8_t in){
+    return (float) in;
+}
+*/
+
 
 #endif
