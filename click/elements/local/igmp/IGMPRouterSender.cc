@@ -37,7 +37,7 @@ Packet *IGMPRouterSender::simple_action(Packet *p) {
 	int subnetMaskLength = this->subnetMask.mask_to_prefix_len();
 	if(subnetMaskLength == -1){
 		click_chatter("Cant determine subnetmask");
-		return nullptr;
+		return NULL;
 	}
 
 	if(this->db->acceptFromSourceAsClient(destination, source, this->subnetAddress, this->subnetMask)){

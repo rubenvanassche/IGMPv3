@@ -28,7 +28,7 @@ Packet* QueryIGMPElement::generatePacket(IPAddress multicast_address){
     WritablePacket *packet = Packet::make(0,0,packetsize + sourcesSize, 0);
     if(packet == 0 ){
         click_chatter( "cannot make igmpv3query packet!");
-        return nullptr;
+        return NULL;
     }
     memset(packet->data(), 0, packet->length());
 

@@ -50,13 +50,13 @@ void IGMPClient::run_timer(Timer* t){
     */
 
     timer.schedule_after_msec(1000);
-    this->push(nullptr);
+    this->push(NULL);
 }
 
 void IGMPClient::push(Packet *p) {
-	Packet* packet = this->reporter.simple_action(0, nullptr);
+	Packet* packet = this->reporter.simple_action(0, NULL);
 
-	if(packet == nullptr){
+	if(packet == NULL){
 		return;
 	}
 

@@ -38,7 +38,7 @@ String IGMPClientDB::toString(){
 void IGMPClientDB::includeSources(IPAddress multicast_address, Vector<IPAddress> sources){
 	Record* record = this->getRecord(multicast_address);
 
-	if(record == nullptr){
+	if(record == NULL){
 		click_chatter("tes");
 		// New multicast address
 		record = new Record();
@@ -88,7 +88,7 @@ void IGMPClientDB::includeSources(IPAddress multicast_address, Vector<IPAddress>
 void IGMPClientDB::excludeSources(IPAddress multicast_address, Vector<IPAddress> sources){
 	Record* record = this->getRecord(multicast_address);
 
-	if(record == nullptr){
+	if(record == NULL){
 		// New multicast address
 		record = new Record();
 		record->multicast_address = multicast_address;
@@ -122,7 +122,7 @@ void IGMPClientDB::excludeSources(IPAddress multicast_address, Vector<IPAddress>
 int IGMPClientDB::addSources(IPAddress multicast_address, Vector<IPAddress> sources){
 	Record* record = this->getRecord(multicast_address);
 
-	if(record == nullptr){
+	if(record == NULL){
 		return -1;
 	}
 
@@ -135,7 +135,7 @@ int IGMPClientDB::addSources(IPAddress multicast_address, Vector<IPAddress> sour
 int IGMPClientDB::addSource(IPAddress multicast_address, IPAddress source){
 	Record* record = this->getRecord(multicast_address);
 
-	if(record == nullptr){
+	if(record == NULL){
 		return -1;
 	}
 
@@ -146,7 +146,7 @@ int IGMPClientDB::addSource(IPAddress multicast_address, IPAddress source){
 int IGMPClientDB::clearSources(IPAddress multicast_address){
 	Record* record = this->getRecord(multicast_address);
 
-	if(record == nullptr){
+	if(record == NULL){
 		return -1;
 	}
 
@@ -157,7 +157,7 @@ int IGMPClientDB::clearSources(IPAddress multicast_address){
 int IGMPClientDB::removeSources(IPAddress multicast_address, Vector<IPAddress> sources){
 	Record* record = this->getRecord(multicast_address);
 
-	if(record == nullptr){
+	if(record == NULL){
 		return -1;
 	}
 
@@ -181,7 +181,7 @@ int IGMPClientDB::removeSources(IPAddress multicast_address, Vector<IPAddress> s
 int IGMPClientDB::removeSource(IPAddress multicast_address, IPAddress source){
 	Record* record = this->getRecord(multicast_address);
 
-	if(record == nullptr){
+	if(record == NULL){
 		return -1;
 	}
 
@@ -215,7 +215,7 @@ Record* IGMPClientDB::getRecord(IPAddress multicast_address){
 		}
 	}
 
-	return nullptr;
+	return NULL;
 }
 int IGMPClientDB::addRecord(IPAddress multicast_address, Vector<IPAddress> sources, filtermode mode){
 	Record* record = new Record;
@@ -228,7 +228,7 @@ int IGMPClientDB::addRecord(IPAddress multicast_address, Vector<IPAddress> sourc
 bool IGMPClientDB::acceptFromSource(IPAddress multicast_address, IPAddress source){
 	Record* record = this->getRecord(multicast_address);
 
-	if(record == nullptr){
+	if(record == NULL){
 		return false;
 	}
 
@@ -255,7 +255,7 @@ bool IGMPClientDB::acceptFromSource(IPAddress multicast_address, IPAddress sourc
 int IGMPClientDB::setMode(IPAddress multicast_address, filtermode mode){
 	Record* record = this->getRecord(multicast_address);
 
-	if(record == nullptr){
+	if(record == NULL){
 		return -1;
 	}
 
