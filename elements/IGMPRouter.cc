@@ -26,8 +26,8 @@ int IGMPRouter::configure(Vector<String> &conf, ErrorHandler *errh) {
 }
 
 void IGMPRouter::run_timer(Timer* t){
-    this->simple_action(nullptr);
-     timer.schedule_after_msec(10000);
+    this->push(0, nullptr);
+    timer.schedule_after_msec(10000);
 }
 
 
@@ -119,15 +119,15 @@ int IGMPRouter::processReport(Packet *p){
 }
 
 
-Packet *IGMPRouter::simple_action(Packet *p) {
+void IGMPRouter::push(int port, Packet *p) {
     if(p == nullptr){
         // Time to send
         p = queryr.generalQuery();
 
         output(0).push(p);
-        return p;
     }else{
         this->processReport(p);
+        p->kill();
     }
 }
 

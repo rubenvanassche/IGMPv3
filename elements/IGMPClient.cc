@@ -33,35 +33,23 @@ int IGMPClient::configure(Vector<String> &conf, ErrorHandler *errh) {
 }
 
 void IGMPClient::run_timer(Timer* t){
-    /*
-    Vector<IPAddress> a;
-    Vector<IPAddress> b;
-    a.push_back(IPAddress("3.3.3.3"));
-    a.push_back(IPAddress("1.1.1.1"));
-    a.push_back(IPAddress("3.3.3.3"));
-    b.push_back(IPAddress("1.1.1.1"));
-    b.push_back(IPAddress("3.3.3.3"));
-
-    Vector<IPAddress> out = vectorsIntersection(a, a);
-    click_chatter("TEST");
-    for(int i = 0;i < out.size();i++){
-        click_chatter("%s", out.at(i).s().c_str());
-    }
-    */
-
     timer.schedule_after_msec(1000);
-    this->push(nullptr);
+    this->push(0, nullptr);
 }
 
-void IGMPClient::push(Packet *p) {
-	Packet* packet = this->reporter.simple_action(0, nullptr);
+void IGMPClient::push(int port, Packet *p) {
+    if(p != nullptr){
+        // Recieve Query
 
-	if(packet == nullptr){
-		return;
-	}
+        click_chatter("QUERY");
+    }else{
+        // Send Report
+        Packet* p = this->reporter.simple_action(0, nullptr);
 
-	//click_chatter("Packet send");
-	output(0).push(packet);
+        if(p != nullptr){
+            output(0).push(p);
+        }
+    }
 }
 
 void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources){
