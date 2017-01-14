@@ -41,6 +41,10 @@ class ProcessQuery : public Element {
 		int process(Packet* packet);
 		void print();
 
+		bool isGeneralQuery();
+		bool isGroupQuery();
+		bool isGroupAndSourceQuery();
+
 		Packet *simple_action(Packet *p);
 
 		// Variables

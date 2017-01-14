@@ -21,8 +21,6 @@ class IGMPClient : public Element {
 
 		int configure(Vector<String>&, ErrorHandler*);
 
-		void run_timer(Timer*);
-
 		const char *class_name() const { return "IGMPClient"; }
 		const char *port_count() const { return "1/1"; }
 		const char *processing() const { return PUSH; }
@@ -36,6 +34,10 @@ class IGMPClient : public Element {
 		void excludeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources);
 		void excludeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources);
 
+		void generalQuery(ProcessQuery &pq);
+		void groupQuery(ProcessQuery &pq);
+		void groupAndSourceQuery(ProcessQuery &pq);
+
 		// Handlers
 		// Use: M {IPAdresss}, S {IPADRESS}
 		// Use: M {IPAdresss}, S {IPADRESS}+{IPADRESS}
@@ -46,18 +48,10 @@ class IGMPClient : public Element {
 
 		void add_handlers();
 	private:
-		Timer timer;
 		ReportIGMPElement reporter;
 		IGMPClientDB* db;
 		IPAddress ipAddress;
 
-		struct TimerData{
-			IGMPClient* me;
-			int x;
-		};
-
-		static void handleExpiry(Timer*, void *);
-		void expire(TimerData*);
 
 		// Send report timer
 		struct SendReportTimerData{

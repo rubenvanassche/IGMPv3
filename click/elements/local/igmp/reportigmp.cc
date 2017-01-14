@@ -37,6 +37,27 @@ Packet* ReportIGMPElement::isEXCLUDE(IPAddress multicast_address){
     return this->generatePacket(records);
 }
 
+Packet* ReportIGMPElement::isINCLUDEOrEXCLUDE(HashTable<IPAddress, filtermode> multicast_addresses){
+    Vector<IPAddress> sources;
+    Vector<grouprecord*> records;
+    HashTable<IPAddress, filtermode>::iterator it;
+
+    for(it = multicast_addresses.begin();it != multicast_addresses.end();it++){
+        grouprecord* record = 0;
+
+        if(it->second == INCLUDE){
+            record = this->generateRecord(0x01, it->first, sources);
+        }else{
+            record = this->generateRecord(0x02, it->first, sources);
+        }
+
+        records.push_back(record);
+    }
+
+    return this->generatePacket(records);
+}
+
+
 Packet* ReportIGMPElement::toIN(IPAddress multicast_address, Vector<IPAddress>& sources){
     grouprecord* record = this->generateRecord(0x03, multicast_address, sources);
 

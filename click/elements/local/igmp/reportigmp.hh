@@ -29,6 +29,8 @@ public:
 	Packet* isINCLUDE(IPAddress multicast_address);
 	Packet* isEXCLUDE(IPAddress multicast_address);
 
+	Packet* isINCLUDEOrEXCLUDE(HashTable<IPAddress, filtermode> multicast_addresses);
+
 	Packet* toEX(IPAddress multicast_address, Vector<IPAddress>& sources);
 	Packet* toIN(IPAddress multicast_address, Vector<IPAddress>& sources);
 

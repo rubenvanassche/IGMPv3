@@ -5,14 +5,10 @@
 
 CLICK_DECLS
 
-IGMPClient::IGMPClient():  timer(this) { };
+IGMPClient::IGMPClient() { };
 IGMPClient::~IGMPClient() { };
 
 int IGMPClient::configure(Vector<String> &conf, ErrorHandler *errh) {
-    // init timer
-    timer.initialize(this);
-    timer.schedule_after_msec(1000);
-
     // Set the database
     IGMPClientDB* tempDb;
     IPAddress* addr = new IPAddress("1.1.1.1");
@@ -29,32 +25,9 @@ int IGMPClient::configure(Vector<String> &conf, ErrorHandler *errh) {
     this->ipAddress = IPAddress(*addr);
     this->db = tempDb;
 
-    // Timer test
-    TimerData* timerdata = new TimerData();
-    timerdata->x = 11;
-    timerdata->me = this;
-    Timer* t = new Timer(&IGMPClient::handleExpiry,timerdata);
-    t->initialize(this);
-    t->schedule_after_msec(2500);
-
     return 0;
 }
 
-
-void IGMPClient::handleExpiry(Timer*, void * data){
-    TimerData* timerdata = (TimerData*) data;
-    assert(timerdata); // the cast must be good
-    timerdata->me->expire(timerdata);
-}
-
-void IGMPClient::expire(TimerData* data){
-    TimerData* timerdata = (TimerData*) data;
-    click_chatter("TIMERDATA %i", timerdata->x);
-}
-
-void IGMPClient::run_timer(Timer* t){
-    timer.schedule_after_msec(1000);
-}
 
 void IGMPClient::push(int port, Packet *p) {
     if(p == nullptr){
@@ -89,6 +62,7 @@ void IGMPClient::push(int port, Packet *p) {
     }
 
     click_chatter("Recieved an unkown packet");
+    p->kill();
     return;
 }
 
@@ -103,7 +77,46 @@ void IGMPClient::proccessQuery(Packet *p){
     ProcessQuery pq;
     pq.process(p);
 
-    pq.print();
+    if(pq.isGeneralQuery()){
+        this->generalQuery(pq);
+        return;
+    }
+
+    if(pq.isGroupQuery()){
+        this->groupQuery(pq);
+        return;
+    }
+
+    if(pq.isGroupAndSourceQuery()){
+        click_chatter("Shouldn't be included");
+        this->groupAndSourceQuery(pq);
+        return;
+    }
+}
+
+void IGMPClient::generalQuery(ProcessQuery &pq){
+    int max_response_code = pq.max_response_code;
+
+    for(int i = 0;i < this->robustness_variable;i++){
+        int reschedule = (int) (((double)((max_response_code*100)+1)/RAND_MAX) * rand() + 0);
+        click_chatter("RE %i", reschedule);
+
+        SendReportTimerData* data = new SendReportTimerData();
+        data->report = this->reporter.isINCLUDEOrEXCLUDE(this->db->getMulticastFiltermodeTable());
+        data->me = this;
+
+        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
+        t->initialize(this);
+        t->schedule_after_msec(reschedule);
+    }
+}
+
+void IGMPClient::groupQuery(ProcessQuery &pq){
+
+}
+
+void IGMPClient::groupAndSourceQuery(ProcessQuery &pq){
+    // Should not be implemented
 }
 
 void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources){
@@ -111,13 +124,10 @@ void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddres
 
     for(int i = 0;i < this->robustness_variable;i++){
         int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
-        click_chatter("RE %i", reschedule);
 
         SendReportTimerData* data = new SendReportTimerData();
         data->report = this->reporter.toEX(multicast_address, sources);
         data->me = this;
-
-        click_chatter("REPORT POINTER %p", data->report);
 
         Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
         t->initialize(this);
@@ -138,13 +148,11 @@ void IGMPClient::excludeWithInclude(IPAddress multicast_address, Vector<IPAddres
 
     for(int i = 0;i < this->robustness_variable;i++){
         int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
-        click_chatter("RE %i", reschedule);
 
         SendReportTimerData* data = new SendReportTimerData();
         data->report = this->reporter.toIN(multicast_address, sources);
         data->me = this;
 
-        click_chatter("REPORT POINTER %p", data->report);
 
         Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
         t->initialize(this);

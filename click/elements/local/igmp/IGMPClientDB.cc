@@ -274,6 +274,16 @@ filtermode IGMPClientDB::getMode(IPAddress multicast_address){
 	return record->filter_mode;
 }
 
+HashTable<IPAddress, filtermode> IGMPClientDB::getMulticastFiltermodeTable(){
+	HashTable<IPAddress, filtermode> output;
+
+	for(int i = 0;i < this->records.size();i++){
+		output.set(this->records.at(i)->multicast_address, this->records.at(i)->filter_mode);
+	}
+
+	return output;
+}
+
 Packet *IGMPClientDB::simple_action(Packet *p) {
 	// TODO: fill
 

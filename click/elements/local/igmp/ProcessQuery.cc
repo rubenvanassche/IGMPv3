@@ -48,6 +48,18 @@ int ProcessQuery::process(Packet* packet){
 	}
 }
 
+bool ProcessQuery::isGeneralQuery(){
+	return this->group_address == IPAddress("0.0.0.0") and this->sources.size() == 0;
+}
+
+bool ProcessQuery::isGroupQuery(){
+	return this->group_address != IPAddress("0.0.0.0") and this->sources.size() == 0;
+}
+
+bool ProcessQuery::isGroupAndSourceQuery(){
+	this->group_address != IPAddress("0.0.0.0") and this->sources.size() != 0;
+}
+
 void ProcessQuery::print(){
 	click_chatter("Type %x", this->type);
 	click_chatter("Checkum %x", this->checksum);
