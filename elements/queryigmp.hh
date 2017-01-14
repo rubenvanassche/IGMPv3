@@ -20,8 +20,8 @@ public:
     ~QueryIGMPElement();
 
     const char *class_name() const { return "QueryIGMPElement"; }
-    const char *port_count() const { return "0/1"; }
-    const char *processing() const { return PUSH; }
+    const char *port_count() const { return "0/0"; }
+    const char *processing() const { return AGNOSTIC; }
 
 
 	Packet* generalQuery();

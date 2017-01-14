@@ -41,14 +41,15 @@ elementclass Client {
 		-> ICMPError($address, unreachable, needfrag)
 		-> output;
 
-	// IGMP multicast
+	// IGMP multicast package
 	igmpClassifier[1] -> [1]output;
 
 	// IGMP Message
-	igmpClassifier[2] -> Discard;
+	igmpClassifier[2] -> igmpClient;
 
 	igmpClient -> IPEncap(4, $address:ip, 224.0.0.22, TTL 1, PROTO 2)
                -> EtherEncap(0x0800, $address:ether, FF:FF:FF:FF:FF:FF)
+			   -> ToDump("qi.dump")
                -> [0]output;
 
 	// Incoming Packets

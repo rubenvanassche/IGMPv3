@@ -35,7 +35,7 @@ class IGMPRouter : public Element {
 
 		const char *class_name() const { return "IGMPRouter"; }
 		const char *port_count() const { return "1/1"; }
-		const char *processing() const { return AGNOSTIC; }
+		const char *processing() const { return PUSH; }
 
 		int isINCLUDE(IPAddress client_address, IPAddress multicast_address);
 		int isEXCLUDE(IPAddress client_address, IPAddress multicast_address);
@@ -48,7 +48,7 @@ class IGMPRouter : public Element {
 
 		int processReport(Packet *p);
 
-		Packet *simple_action(Packet *p);
+		void push(int port, Packet *p);
 
 		static String getDBHandler(Element *e, void * thunk);
 
