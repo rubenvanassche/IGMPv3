@@ -34,8 +34,8 @@ class IGMPRouter : public Element {
 		void run_timer(Timer*);
 
 		const char *class_name() const { return "IGMPRouter"; }
-		const char *port_count() const { return "1/1"; }
-		const char *processing() const { return AGNOSTIC; }
+		const char *port_count() const { return "1/2"; }
+		const char *processing() const { return PUSH; }
 
 		int isINCLUDE(IPAddress client_address, IPAddress multicast_address);
 		int isEXCLUDE(IPAddress client_address, IPAddress multicast_address);
@@ -48,7 +48,7 @@ class IGMPRouter : public Element {
 
 		int processReport(Packet *p);
 
-		Packet *simple_action(Packet *p);
+		void push(int port, Packet *p);
 
 		static String getDBHandler(Element *e, void * thunk);
 
@@ -56,7 +56,11 @@ class IGMPRouter : public Element {
 	private:
 		IGMPRouterDB* db;
 		QueryIGMPElement queryr;
+		IPAddress* IPclient1;
+		IPAddress* IPclient2;
 		Timer timer;
+
+		inline void update_cksum(click_ip *, int) const;
 };
 
 CLICK_ENDDECLS

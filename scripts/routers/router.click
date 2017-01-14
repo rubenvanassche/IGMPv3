@@ -17,11 +17,11 @@ elementclass Router {
 
 	// IGMP elements
 	igmpDB::IGMPRouterDB();
-	igmpRouter::IGMPRouter(DB igmpDB);
+	igmpRouter::IGMPRouter(DB igmpDB, Client1 $client1_address:ip, Client2 $client2_address:ip);
 	igmpClassifier::IGMPRouterClassifier(DB igmpDB);
 
 	igmpPacketCopy::Tee(2);
-	igmpPacketCopyQuery::Tee(2);
+//	igmpPacketCopyQuery::Tee(2);
 
 	client1_igmpRouterSender::IGMPRouterSender(DB igmpDB, ADDR $client1_address:ipnet);
 	client2_igmpRouterSender::IGMPRouterSender(DB igmpDB, ADDR $client2_address:ipnet);
@@ -36,14 +36,15 @@ elementclass Router {
 	client2_igmpRouterSender -> EtherEncap(0x0800, $client2_address:ether, FF:FF:FF:FF:FF:FF)  	-> [2]output;
 
 	// Send queries over the interfaces
-	igmpRouter[0] -> igmpPacketCopyQuery;
-	//igmpRouter[0] -> Discard;
+//	igmpRouter[0] -> igmpPacketCopyQuery;
 
-	igmpPacketCopyQuery[0] -> IPEncap(4, $client1_address:ip, 224.0.0.1, TTL 1, PROTO 2)
+//	igmpPacketCopyQuery[0] -> IPEncap(4, $client1_address:ip, 224.0.0.1, TTL 1, PROTO 2)
+	igmpRouter[0]
 		->  EtherEncap(0x0800, $client1_address:ether, FF:FF:FF:FF:FF:FF)
 		-> [1]output
 
-	igmpPacketCopyQuery[1] -> IPEncap(4, $client2_address:ip, 224.0.0.1, TTL 1, PROTO 2)
+//	igmpPacketCopyQuery[1] -> IPEncap(4, $client2_address:ip, 224.0.0.1, TTL 1, PROTO 2)
+	igmpRouter[1]
 		->  EtherEncap(0x0800, $client2_address:ether, FF:FF:FF:FF:FF:FF)
 		-> [2]output
 

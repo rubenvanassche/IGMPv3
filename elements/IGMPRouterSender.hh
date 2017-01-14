@@ -36,7 +36,7 @@ class IGMPRouterSender : public Element {
 		const char *port_count() const { return "1/1"; }
 		const char *processing() const { return PUSH; }
 
-		Packet *simple_action(Packet *p);
+		void push(int port, Packet *p);
 	private:
 		IGMPRouterDB* db;
 		IPAddress subnetAddress;

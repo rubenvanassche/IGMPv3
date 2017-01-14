@@ -23,7 +23,7 @@ public:
     ~ReportIGMPElement();
 
     const char *class_name() const { return "ReportIGMPElement"; }
-    const char *port_count() const { return "0/1"; }
+    const char *port_count() const { return "0/0"; }
     const char *processing() const { return AGNOSTIC; }
 
 	void isINCLUDE(IPAddress multicast_address, int robustnessVariable);

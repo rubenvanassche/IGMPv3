@@ -23,7 +23,7 @@ int IGMPClassifier::configure(Vector<String> &conf, ErrorHandler *errh) {
 }
 
 
-Packet* IGMPClassifier::simple_action(Packet *p) {
+void IGMPClassifier::push(int port, Packet *p) {
 	const click_ip* ipHeader = p->ip_header();
 	IPAddress destination = IPAddress(ipHeader->ip_dst);
 	IPAddress source = IPAddress(ipHeader->ip_src);
@@ -34,6 +34,7 @@ Packet* IGMPClassifier::simple_action(Packet *p) {
 		igmpv3query* format = (igmpv3query*)igmpbegin;
 
         if(format->type == 0x11){
+            //click_chatter("QUERY");
             output(2).push(p);
         }
 
