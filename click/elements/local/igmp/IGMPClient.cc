@@ -40,8 +40,9 @@ void IGMPClient::run_timer(Timer* t){
 void IGMPClient::push(int port, Packet *p) {
     if(p != nullptr){
         // Recieve Query
-
-        click_chatter("QUERY");
+        //
+        this->proccessQuery(p);
+        p->kill();
     }else{
         // Send Report
         Packet* p = this->reporter.simple_action(0, nullptr);
@@ -50,6 +51,20 @@ void IGMPClient::push(int port, Packet *p) {
             output(0).push(p);
         }
     }
+}
+
+void IGMPClient::proccessQuery(Packet *p){
+    const click_ip* ipHeader = p->ip_header();
+
+    if(ipHeader->ip_p != 2){
+        click_chatter("Recieved a packet which is not IGMP Protocol");
+        return;
+    }
+
+    ProcessQuery pq;
+    pq.process(p);
+
+    pq.print();
 }
 
 void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources){

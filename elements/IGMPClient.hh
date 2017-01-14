@@ -7,6 +7,7 @@
 #include "packets.hh"
 #include "reportigmp.hh"
 #include "IGMPClientDB.hh"
+#include "ProcessQuery.hh"
 
 #if EXPLICIT_TEMPLATE_INSTANCES
 template class Vector<SomeThing>;
@@ -27,6 +28,8 @@ class IGMPClient : public Element {
 		const char *processing() const { return PUSH; }
 
 		void push(int port, Packet *p);
+
+		void proccessQuery(Packet *p);
 
 		void includeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources);
 		void includeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources);
