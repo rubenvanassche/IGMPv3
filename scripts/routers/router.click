@@ -48,7 +48,7 @@ elementclass Router {
 	igmpPacketCopyQuery[1]
 		-> SetIPSrc(ADDR $client2_address:ip)
 		-> SetIPChecksum
-		->  EtherEncap(0x0800, $client2_address:ether, FF:FF:FF:FF:FF:FF)
+		-> EtherEncap(0x0800, $client2_address:ether, FF:FF:FF:FF:FF:FF)
 		-> [2]output
 
 

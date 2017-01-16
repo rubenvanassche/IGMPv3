@@ -48,6 +48,8 @@ class IGMPRouter : public Element {
 
 		int processReport(Packet *p);
 
+		void sendGroupQuery(IPAddress multicast_address);
+
 		void push(int port, Packet *p);
 
 		static String getDBHandler(Element *e, void * thunk);
@@ -58,9 +60,19 @@ class IGMPRouter : public Element {
 		QueryIGMPElement queryr;
 		Timer timer;
 
+
+		// Send send group query timer
+		struct SendGroupQueryTimerData{
+			IGMPRouter* me;
+			IPAddress address;
+			Packet* query;
+		};
+
+		static void handleSendGroupQuery(Timer*, void *);
+
 		// Variables
 		int robustness_variable = 2; // How many times resend
-		int query_interval = 125; // Send each query_interval (seconds) an general query_interval
+		int query_interval = 2; // Send each query_interval (seconds) an general query_interval
 		int query_response_interval = 100; // for the MAX Response code, 100 is 10 seconds, must be < query_interval
 		int group_memberschip_interval = robustness_variable*query_interval*query_response_interval; // Time when router decides there are no more members for a group or source from the network
 		int last_member_query_interval = 10; // Max response for Group-specific queries

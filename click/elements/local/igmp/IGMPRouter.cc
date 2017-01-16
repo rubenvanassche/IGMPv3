@@ -9,7 +9,7 @@ IGMPRouter::~IGMPRouter() { };
 
 int IGMPRouter::configure(Vector<String> &conf, ErrorHandler *errh) {
     timer.initialize(this);
-    timer.schedule_after_msec(2000);
+    timer.schedule_after_sec(this->query_interval);
 
     // Set the database
     IGMPRouterDB* tempDb;
@@ -24,21 +24,32 @@ int IGMPRouter::configure(Vector<String> &conf, ErrorHandler *errh) {
 
     this->db = tempDb;
 
+
     return 0;
 }
 
 void IGMPRouter::run_timer(Timer* t){
-    this->push(0, nullptr);
-    timer.schedule_after_msec(2000);
+    this->push(0, queryr.generalQuery());
+    timer.schedule_after_sec(this->query_interval);
 }
 
+void IGMPRouter::handleSendGroupQuery(Timer*, void * data){
+    SendGroupQueryTimerData* timerdata = (SendGroupQueryTimerData*) data;
+    assert(timerdata); // the cast must be good
+    timerdata->me->push(0, timerdata->query);
+}
+
+void IGMPRouter::sendGroupQuery(IPAddress multicast_address){
+    Packet* p = queryr.groupQuery(multicast_address);
+    this->push(0, p);
+}
 
 int IGMPRouter::isINCLUDE(IPAddress client_address, IPAddress multicast_address){
-    click_chatter("isIN");
+
     return 0;
 }
 int IGMPRouter::isEXCLUDE(IPAddress client_address, IPAddress multicast_address){
-    click_chatter("isEX");
+
     return 0;
 }
 
@@ -60,6 +71,7 @@ int IGMPRouter::toEX(IPAddress client_address, IPAddress multicast_address, Vect
 }
 int IGMPRouter::toIN(IPAddress client_address, IPAddress multicast_address, Vector<IPAddress>& sources){
     // If client does not exist add it!
+    click_chatter("test");
     if(this->db->dbExists(client_address) == false){
         this->db->addDb(client_address);
     }
@@ -71,6 +83,8 @@ int IGMPRouter::toIN(IPAddress client_address, IPAddress multicast_address, Vect
     }
 
     cdb->setMode(multicast_address, INCLUDE);
+
+    this->sendGroupQuery(multicast_address);
 
     return 0;
 }
@@ -91,8 +105,6 @@ int IGMPRouter::processReport(Packet *p){
 
     const click_ip* ipHeader = p->ip_header();
     IPAddress client(ipHeader->ip_src);
-
-
 
     for(int i = 0;i < pr.records.size();i++){
         grouprecord* record = pr.records.at(i);
@@ -124,14 +136,39 @@ int IGMPRouter::processReport(Packet *p){
 
 void IGMPRouter::push(int port, Packet *p) {
     if(p == nullptr){
-        // Time to send
-        p = queryr.generalQuery();
+        return;
+    }
 
-        output(0).push(p);
-    }else{
+    // Let's find out which packet p is
+    unsigned char * igmpbegin = 0;
+    igmpv3query* queryFormat = 0;
+    igmpv3report* reportFormat = 0;
+
+    // A report?
+    igmpbegin = (unsigned char *)p->data()+sizeof(click_ip);
+    reportFormat = (igmpv3report*)igmpbegin;
+
+    if(reportFormat->type == 0x22){
+        // It is!
         this->processReport(p);
         p->kill();
+        return;
     }
+
+    // A Query?
+    igmpbegin = (unsigned char *)p->data()+sizeof(click_ip);
+    queryFormat = (igmpv3query*)igmpbegin;
+
+    if(queryFormat->type == 0x11){
+        // It is!
+        output(0).push(p);
+
+        return;
+    }
+
+    click_chatter("Recieved an unkown packet");
+    p->kill();
+    return;
 }
 
 String IGMPRouter::getDBHandler(Element *e, void * thunk){

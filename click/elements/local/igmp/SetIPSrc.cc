@@ -30,7 +30,6 @@ void SetIPSrc::push(int port, Packet *p) {
     click_ip *ip = reinterpret_cast<click_ip *>(ipPacket->data());
 
     ip->ip_src = this->ipAddress.in_addr();
-	ip->ip_sum = click_in_cksum((unsigned char *) &ip, sizeof(click_ip));
 
 
     ipPacket->set_ip_header(ip, sizeof(click_ip));
