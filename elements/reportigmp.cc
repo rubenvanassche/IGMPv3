@@ -115,7 +115,7 @@ Packet* ReportIGMPElement::generatePacket(Vector<grouprecord*> records){
     if(packet == 0){
         click_chatter( "cannot make igmpv3report packet!");
 
-        return nullptr;
+        return NULL;
     }
 
     memset(packet->data(), 0, packet->length());
