@@ -30,7 +30,7 @@ int IGMPClient::configure(Vector<String> &conf, ErrorHandler *errh) {
 
 
 void IGMPClient::push(int port, Packet *p) {
-    if(p == nullptr){
+    if(p == NULL){
         return;
     }
 
