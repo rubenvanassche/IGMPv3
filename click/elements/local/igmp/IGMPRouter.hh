@@ -60,6 +60,9 @@ class IGMPRouter : public Element {
 		QueryIGMPElement queryr;
 		Timer timer;
 
+		// All queries that are sheduled
+		Vector<IPAddress> groupQuerysSheduled;
+
 
 		// Send send group query timer
 		struct SendGroupQueryTimerData{
