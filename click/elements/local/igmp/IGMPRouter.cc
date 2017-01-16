@@ -153,7 +153,7 @@ int IGMPRouter::processReport(Packet *p){
 
 
 void IGMPRouter::push(int port, Packet *p) {
-    if(p == nullptr){
+    if(p == NULL){
         return;
     }
 

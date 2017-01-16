@@ -64,7 +64,7 @@ Packet* QueryIGMPElement::generatePacket(IPAddress multicast_address){
     WritablePacket *packet = Packet::make(0,0,packetsize + sourcesSize, 0);
     if(packet == 0 ){
         click_chatter( "cannot make igmpv3query packet!");
-        return nullptr;
+        return NULL;
     }
     memset(packet->data(), 0, packet->length());
 
@@ -74,15 +74,15 @@ Packet* QueryIGMPElement::generatePacket(IPAddress multicast_address){
     // Type for IGMP Query Packet
     format->type = 0x11;
     // TODO: the responsecode may vary, the value 1 is ok
-    format->max_response_code = 0x18;
+    format->max_response_code = 0x64;
     // Checksum will be calculated later
     format->checksum = 0x0000;
     // The address of the multicast group
     format->group_address = multicast_address.addr();
-    // TODO: querier robustness value (qrv) instructs the host to send all messages qrv times
+    // do not surpress and robustness_variable = 2
     format->resv_and_s_and_qrv = 0x02;
     // TODO: this
-    format->qqic = 0x14;
+    format->qqic = 0x7d;
     // The amount of sources
     format->no_of_sources = htons(sourcesVector.size());
     // Set the sources
