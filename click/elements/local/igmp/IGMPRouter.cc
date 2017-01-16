@@ -40,8 +40,15 @@ void IGMPRouter::handleSendGroupQuery(Timer*, void * data){
 }
 
 void IGMPRouter::sendGroupQuery(IPAddress multicast_address){
-    Packet* p = queryr.groupQuery(multicast_address);
-    this->push(0, p);
+    SendGroupQueryTimerData* data = new SendGroupQueryTimerData();
+    data->query = queryr.groupQuery(multicast_address);
+    data->me = this;
+    data->address = multicast_address;
+
+
+    Timer* t = new Timer(&IGMPRouter::handleSendGroupQuery,data);
+    t->initialize(this);
+    t->schedule_after_msec(10);
 }
 
 int IGMPRouter::isINCLUDE(IPAddress client_address, IPAddress multicast_address){
@@ -71,7 +78,6 @@ int IGMPRouter::toEX(IPAddress client_address, IPAddress multicast_address, Vect
 }
 int IGMPRouter::toIN(IPAddress client_address, IPAddress multicast_address, Vector<IPAddress>& sources){
     // If client does not exist add it!
-    click_chatter("test");
     if(this->db->dbExists(client_address) == false){
         this->db->addDb(client_address);
     }
