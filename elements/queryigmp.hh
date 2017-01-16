@@ -29,6 +29,8 @@ public:
 
 	Packet* generatePacket(IPAddress multicast_address);
 
+	Packet* setIPHeader(Packet* p, IPAddress destination);
+
     void push(int, Packet*);
 };
 CLICK_ENDDECLS

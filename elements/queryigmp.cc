@@ -12,12 +12,48 @@ QueryIGMPElement::~QueryIGMPElement(){}
 
 Packet* QueryIGMPElement::generalQuery(){
     IPAddress zero("0.0.0.0");
-    return this->generatePacket(zero);
+    Packet* p =  this->generatePacket(zero);
+
+    p = this->setIPHeader(p, IPAddress("224.0.0.1"));
+    return p;
 }
 
 Packet* QueryIGMPElement::groupQuery(IPAddress multicast_address){
-    return this->generatePacket(multicast_address);
+    Packet* p =  this->generatePacket(multicast_address);
+
+    p =  this->setIPHeader(p,  multicast_address);
+    return p;
 }
+
+// Doesn't do a checksum and source setting
+Packet* QueryIGMPElement::setIPHeader(Packet* p, IPAddress destination){
+    click_ip ipheader;
+
+	memset(&ipheader, 0, sizeof(click_ip));
+
+	ipheader.ip_v = 4;
+	ipheader.ip_hl = sizeof(click_ip) >> 2;
+	ipheader.ip_ttl = 1;
+	ipheader.ip_p = 2;
+	ipheader.ip_dst = destination.in_addr();
+	ipheader.ip_src = IPAddress("0.0.0.0").in_addr();
+	ipheader.ip_sum = click_in_cksum((unsigned char *) &ipheader, sizeof(click_ip));
+
+    WritablePacket *ipPacket = p->push(sizeof(click_ip));
+
+    click_ip *ip = reinterpret_cast<click_ip *>(ipPacket->data());
+    memcpy(ip, &ipheader, sizeof(click_ip));
+
+
+    ip->ip_len = htons(ipPacket->length());
+    ip->ip_id = htons(1);
+
+
+    ipPacket->set_ip_header(ip, sizeof(click_ip));
+
+    return ipPacket;
+
+    }
 
 Packet* QueryIGMPElement::generatePacket(IPAddress multicast_address){
     Vector<IPAddress> sourcesVector; // Empty for now
@@ -32,7 +68,8 @@ Packet* QueryIGMPElement::generatePacket(IPAddress multicast_address){
     }
     memset(packet->data(), 0, packet->length());
 
-    igmpv3query* format = (igmpv3query*)packet->data();
+    unsigned char * igmpbegin = (unsigned char *)packet->data();
+    igmpv3query* format = (igmpv3query*)igmpbegin;
 
     // Type for IGMP Query Packet
     format->type = 0x11;

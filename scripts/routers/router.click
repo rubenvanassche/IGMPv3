@@ -38,11 +38,16 @@ elementclass Router {
 	// Send queries over the interfaces
 	igmpRouter[0] -> igmpPacketCopyQuery;
 
-	igmpPacketCopyQuery[0] -> IPEncap(4, $client1_address:ip, 224.0.0.1, TTL 1, PROTO 2)
-		->  EtherEncap(0x0800, $client1_address:ether, FF:FF:FF:FF:FF:FF)
+	igmpPacketCopyQuery[0]
+		-> SetIPSrc(ADDR $client1_address:ip)
+		-> SetIPChecksum
+		-> EtherEncap(0x0800, $client1_address:ether, FF:FF:FF:FF:FF:FF)
+		-> ToDump("qi.dump")
 		-> [1]output
 
-	igmpPacketCopyQuery[1] -> IPEncap(4, $client2_address:ip, 224.0.0.1, TTL 1, PROTO 2)
+	igmpPacketCopyQuery[1]
+		-> SetIPSrc(ADDR $client2_address:ip)
+		-> SetIPChecksum
 		->  EtherEncap(0x0800, $client2_address:ether, FF:FF:FF:FF:FF:FF)
 		-> [2]output
 

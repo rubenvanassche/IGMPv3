@@ -9,12 +9,14 @@ IGMPRouter::~IGMPRouter() { };
 
 int IGMPRouter::configure(Vector<String> &conf, ErrorHandler *errh) {
     timer.initialize(this);
-    timer.schedule_after_msec(10000);
+    timer.schedule_after_msec(2000);
 
     // Set the database
     IGMPRouterDB* tempDb;
+
     int res = cp_va_kparse(conf, this, errh,
-         "DB", 0, cpElementCast, "IGMPRouterDB", &tempDb, cpEnd);
+         "DB", 0, cpElementCast, "IGMPRouterDB", &tempDb,
+    cpEnd);
 
     if(res < 0){
         return res; // parsing failed
@@ -27,7 +29,7 @@ int IGMPRouter::configure(Vector<String> &conf, ErrorHandler *errh) {
 
 void IGMPRouter::run_timer(Timer* t){
     this->push(0, nullptr);
-    timer.schedule_after_msec(10000);
+    timer.schedule_after_msec(2000);
 }
 
 

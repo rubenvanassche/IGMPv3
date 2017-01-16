@@ -99,7 +99,6 @@ void IGMPClient::generalQuery(ProcessQuery &pq){
 
     for(int i = 0;i < this->robustness_variable;i++){
         int reschedule = (int) (((double)((max_response_time*100)+1)/RAND_MAX) * rand() + 0);
-        click_chatter("RE %i", reschedule);
 
         SendReportTimerData* data = new SendReportTimerData();
         data->report = this->reporter.isINCLUDEOrEXCLUDE(this->db->getMulticastFiltermodeTable());
