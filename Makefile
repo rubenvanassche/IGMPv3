@@ -17,3 +17,6 @@ test:
 
 run:
 	cd click; userlevel/click ../scripts/ipnetwork.click -p 1981
+
+handlers:
+	sh runhandlers.sh
