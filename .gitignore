@@ -37,6 +37,9 @@
 
 # Click
 
+*.dump
+*.pcap
+
 click/bsdmodule
 
 click/click-buildtool

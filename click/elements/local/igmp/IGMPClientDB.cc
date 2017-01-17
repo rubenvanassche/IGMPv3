@@ -10,7 +10,7 @@ IGMPClientDB::~IGMPClientDB() { };
 
 String IGMPClientDB::toString(){
 	String out;
-	out += "IGMPClientDB\n";
+	out += "IGMPRouterDB\n";
 	out += "------------\n";
 
 	for(int i = 0;i < this->records.size();i++){
