@@ -2,7 +2,7 @@
 Project voor Telecommunicatiesystemen.
 
 ## Hoe compileren?
->> make
+> make
 
 Compileert en runt ipnetwork.click
 
@@ -17,10 +17,9 @@ Deze moeten volgend argument bevatten: M {multicast_address}, S 1.1.1.1
 Met deze handlers kunnen clients deelnemen aan de multicast of afhaken.
 
 ## Wat werkt niet?
-- General query's worden verstuurd maar niet verwerkt
-- Group Specific query's worden niet verstuurd
-- Er wordt geen rekening gehouden met timers
+- Er wordt bijna geen rekening gehouden met timers
 - Stukken van het protocol zijn niet zo goed geïmplenteerd(bijvoorbeeld samengestede raporten)
+- Deel van vesrturen van rapporten werkt maar volgens mij niet correct volgens RFC
 
 ## Wat werkt wel?
 - Een client kan joinen of leaven
