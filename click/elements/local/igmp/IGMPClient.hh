@@ -7,6 +7,7 @@
 #include "packets.hh"
 #include "reportigmp.hh"
 #include "IGMPClientDB.hh"
+#include "ProcessQuery.hh"
 
 #if EXPLICIT_TEMPLATE_INSTANCES
 template class Vector<SomeThing>;
@@ -20,18 +21,22 @@ class IGMPClient : public Element {
 
 		int configure(Vector<String>&, ErrorHandler*);
 
-		void run_timer(Timer*);
-
 		const char *class_name() const { return "IGMPClient"; }
 		const char *port_count() const { return "1/1"; }
 		const char *processing() const { return PUSH; }
 
 		void push(int port, Packet *p);
 
+		void proccessQuery(Packet *p);
+
 		void includeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources);
 		void includeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources);
 		void excludeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources);
 		void excludeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources);
+
+		void generalQuery(ProcessQuery &pq);
+		void groupQuery(ProcessQuery &pq);
+		void groupAndSourceQuery(ProcessQuery &pq);
 
 		// Handlers
 		// Use: M {IPAdresss}, S {IPADRESS}
@@ -43,10 +48,22 @@ class IGMPClient : public Element {
 
 		void add_handlers();
 	private:
-		Timer timer;
 		ReportIGMPElement reporter;
 		IGMPClientDB* db;
 		IPAddress ipAddress;
+
+
+		// Send report timer
+		struct SendReportTimerData{
+			IGMPClient* me;
+			Packet* report;
+		};
+
+		static void handleSendReportTimer(Timer*, void *);
+
+		// Variables
+		int unsolicited_report_interval = 1; // Send reports after x seconds random from [0, unsolicited_report_interval]
+		int robustness_variable = 2;
 };
 
 class ConfigParse{

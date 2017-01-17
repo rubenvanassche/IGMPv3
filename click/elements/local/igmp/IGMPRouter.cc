@@ -9,40 +9,66 @@ IGMPRouter::~IGMPRouter() { };
 
 int IGMPRouter::configure(Vector<String> &conf, ErrorHandler *errh) {
     timer.initialize(this);
-    timer.schedule_after_msec(10000);
+    timer.schedule_after_sec(this->query_interval);
 
     // Set the database
     IGMPRouterDB* tempDb;
-	IPAddress* addr1 = new IPAddress("1.1.1.1");
-	IPAddress* addr2 = new IPAddress("1.1.1.1");	
+
     int res = cp_va_kparse(conf, this, errh,
-         "DB", 0, cpElementCast, "IGMPRouterDB", &tempDb,"Client1", 0, cpIPAddress, addr1,"Client2", 0, cpIPAddress, addr2, cpEnd);
+         "DB", 0, cpElementCast, "IGMPRouterDB", &tempDb,
+    cpEnd);
 
     if(res < 0){
         return res; // parsing failed
     }
 
     this->db = tempDb;
-	this->IPclient1 = addr1;
-	this->IPclient2 = addr2;
+
 
     return 0;
 }
 
 void IGMPRouter::run_timer(Timer* t){
-
-    this->push(0, NULL);
-    timer.schedule_after_msec(10000);
-
+    this->push(0, queryr.generalQuery());
+    timer.schedule_after_sec(this->query_interval);
 }
 
+void IGMPRouter::handleSendGroupQuery(Timer*, void * data){
+    SendGroupQueryTimerData* timerdata = (SendGroupQueryTimerData*) data;
+    assert(timerdata); // the cast must be good
+    timerdata->me->push(0, timerdata->query);
+}
+
+void IGMPRouter::sendGroupQuery(IPAddress multicast_address){
+    Vector<IPAddress>::iterator it;
+
+    for(it = this->groupQuerysSheduled.begin();it != this->groupQuerysSheduled.end();it++){
+        if((*it) == multicast_address){
+            // Query is already sheduled;
+            return;
+        }
+    }
+
+    for(int i = 0;i < this->robustness_variable;i++){
+        SendGroupQueryTimerData* data = new SendGroupQueryTimerData();
+        data->query = queryr.groupQuery(multicast_address);
+        data->me = this;
+        data->address = multicast_address;
+
+
+        Timer* t = new Timer(&IGMPRouter::handleSendGroupQuery,data);
+        t->initialize(this);
+        t->schedule_after_msec(10);
+    }
+
+    this->groupQuerysSheduled.push_back(multicast_address);
+}
 
 int IGMPRouter::isINCLUDE(IPAddress client_address, IPAddress multicast_address){
-    click_chatter("isIN");
     return 0;
 }
 int IGMPRouter::isEXCLUDE(IPAddress client_address, IPAddress multicast_address){
-    click_chatter("isEX");
+
     return 0;
 }
 
@@ -76,6 +102,8 @@ int IGMPRouter::toIN(IPAddress client_address, IPAddress multicast_address, Vect
 
     cdb->setMode(multicast_address, INCLUDE);
 
+    this->sendGroupQuery(multicast_address);
+
     return 0;
 }
 
@@ -95,7 +123,6 @@ int IGMPRouter::processReport(Packet *p){
 
     const click_ip* ipHeader = p->ip_header();
     IPAddress client(ipHeader->ip_src);
-
 
     for(int i = 0;i < pr.records.size();i++){
         grouprecord* record = pr.records.at(i);
@@ -125,77 +152,41 @@ int IGMPRouter::processReport(Packet *p){
 }
 
 
-
 void IGMPRouter::push(int port, Packet *p) {
+    if(p == NULL){
+        return;
+    }
 
-	click_ip iph1 , iph2 ;
-	int _id = 0;
-	//client1
-	memset(&iph1, 0, sizeof(click_ip));
-	iph1.ip_v = 4;
-	iph1.ip_hl = sizeof(click_ip) >> 2;
-	iph1.ip_ttl = 1;
-	iph1.ip_p = 2;
-	iph1.ip_dst = IPAddress("224.0.0.1").in_addr();
-	iph1.ip_src = this->IPclient1->in_addr();
-	iph1.ip_sum = click_in_cksum((unsigned char *) &iph1, sizeof(click_ip));
-	if(p == NULL){
-        // Time to send
-        p = queryr.generalQuery();
-	
-		WritablePacket *p1 = p->push(sizeof(click_ip));
-		if (!p1) return;
+    // Let's find out which packet p is
+    unsigned char * igmpbegin = 0;
+    igmpv3query* queryFormat = 0;
+    igmpv3report* reportFormat = 0;
 
-		click_ip *ip = reinterpret_cast<click_ip *>(p1->data());
-		memcpy(ip, &iph1, sizeof(click_ip));
-		if (ip->ip_len) {		// use_dst_anno
-		  ip->ip_dst = p1->dst_ip_anno();
-		  update_cksum(ip, 16);
-		  update_cksum(ip, 18);
-		} else
-		  p1->set_dst_ip_anno(IPAddress(ip->ip_dst));
-		ip->ip_len = htons(p1->length());
-		ip->ip_id = htons(1);
-		update_cksum(ip, 2);
-		update_cksum(ip, 4);
+    // A report?
+    igmpbegin = (unsigned char *)p->data()+sizeof(click_ip);
+    reportFormat = (igmpv3report*)igmpbegin;
 
-		p1->set_ip_header(ip, sizeof(click_ip));
-
-			output(0).push(p1);
-
-
-		//Client2
-		memset(&iph2, 0, sizeof(click_ip));
-		iph2.ip_v = 4;
-		iph2.ip_hl = sizeof(click_ip) >> 2;
-		iph2.ip_ttl = 1;
-		iph2.ip_p = 2;
-		iph2.ip_dst = IPAddress("224.0.0.1").in_addr();
-		iph2.ip_src = this->IPclient2->in_addr();
-		iph2.ip_sum = click_in_cksum((unsigned char *) &iph2, sizeof(click_ip));
-		WritablePacket *p2 = p->push(sizeof(click_ip));
-		if (!p2) return;
-
-		click_ip *ip2 = reinterpret_cast<click_ip *>(p2->data());
-		memcpy(ip2, &iph2, sizeof(click_ip));
-		if (ip2->ip_len) {		// use_dst_anno
-		  ip2->ip_dst = p2->dst_ip_anno();
-		  update_cksum(ip2, 16);
-		  update_cksum(ip2, 18);
-		} else
-		  p2->set_dst_ip_anno(IPAddress(ip2->ip_dst));
-		ip2->ip_len = htons(p2->length());
-		ip2->ip_id = htons(1);
-		update_cksum(ip2, 2);
-		update_cksum(ip2, 4);
-
-		p2->set_ip_header(ip2, sizeof(click_ip));
-
-		output(1).push(p2);
-    }else{
+    if(reportFormat->type == 0x22){
+        // It is!
         this->processReport(p);
         p->kill();
+        return;
     }
+
+    // A Query?
+    igmpbegin = (unsigned char *)p->data()+sizeof(click_ip);
+    queryFormat = (igmpv3query*)igmpbegin;
+
+    if(queryFormat->type == 0x11){
+        // It is!
+        output(0).push(p);
+
+        return;
+    }
+
+    click_chatter("Recieved an unkown packet");
+    p->kill();
+    return;
 }
 
 String IGMPRouter::getDBHandler(Element *e, void * thunk){
@@ -207,20 +198,6 @@ void IGMPRouter::add_handlers(){
     add_read_handler("get_db", &getDBHandler, (void *)0);
 }
 
-inline void
-IGMPRouter::update_cksum(click_ip *ip, int off) const
-{
-#if HAVE_INDIFFERENT_ALIGNMENT
-    click_update_in_cksum(&ip->ip_sum, 0, ((uint16_t *) ip)[off/2]);
-#else
-    const uint8_t *u = (const uint8_t *) ip;
-# if CLICK_BYTE_ORDER == CLICK_BIG_ENDIAN
-    click_update_in_cksum(&ip->ip_sum, 0, u[off]*256 + u[off+1]);
-# else
-    click_update_in_cksum(&ip->ip_sum, 0, u[off] + u[off+1]*256);
-# endif
-#endif
-}
 
 CLICK_ENDDECLS
 EXPORT_ELEMENT(IGMPRouter)

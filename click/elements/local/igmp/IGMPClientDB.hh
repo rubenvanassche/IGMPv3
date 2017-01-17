@@ -4,11 +4,13 @@
 
 #include <click/element.hh>
 #include <click/vector.cc>
+#include <click/hashtable.hh>
 #include <click/args.hh>
 #include "packets.hh"
 
 #if EXPLICIT_TEMPLATE_INSTANCES
 template class Vector<SomeThing>;
+template class HashTable<SomeThing, OtherThing>;
 #endif
 
 CLICK_DECLS
@@ -63,6 +65,9 @@ class IGMPClientDB : public Element {
 
 		Vector<IPAddress> getSources(IPAddress multicast_address);
 		filtermode getMode(IPAddress multicast_address);
+
+		// Get an map with each multicast_addr and if it is INCLUDE of EXCLUDE
+		HashTable<IPAddress, filtermode> getMulticastFiltermodeTable();
 
 		Packet *simple_action(Packet *p);
 	private:

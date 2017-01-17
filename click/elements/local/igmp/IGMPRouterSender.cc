@@ -37,7 +37,6 @@ void IGMPRouterSender::push(int port, Packet *p) {
 	int subnetMaskLength = this->subnetMask.mask_to_prefix_len();
 	if(subnetMaskLength == -1){
 		click_chatter("Cant determine subnetmask");
-
 		p->kill();
 		return;
 	}

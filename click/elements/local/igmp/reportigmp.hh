@@ -26,14 +26,16 @@ public:
     const char *port_count() const { return "0/0"; }
     const char *processing() const { return AGNOSTIC; }
 
-	void isINCLUDE(IPAddress multicast_address, int robustnessVariable);
-	void isEXCLUDE(IPAddress multicast_address, int robustnessVariable);
+	Packet* isINCLUDE(IPAddress multicast_address);
+	Packet* isEXCLUDE(IPAddress multicast_address);
 
-	void toEX(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
-	void toIN(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
+	Packet* isINCLUDEOrEXCLUDE(HashTable<IPAddress, filtermode> multicast_addresses);
 
-	void block(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
-	void allow(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable);
+	Packet* toEX(IPAddress multicast_address, Vector<IPAddress>& sources);
+	Packet* toIN(IPAddress multicast_address, Vector<IPAddress>& sources);
+
+	Packet* block(IPAddress multicast_address, Vector<IPAddress>& sources);
+	Packet* allow(IPAddress multicast_address, Vector<IPAddress>& sources);
 
 	grouprecord* generateRecord(uint8_t type, IPAddress multicast_address, Vector<IPAddress>& sources);
 
@@ -43,9 +45,6 @@ public:
 private:
 	// Calculate the amount of bytes a single group record needs
 	int calculateGrouprecordSize(grouprecord* record);
-
-    uint32_t maxSize;
-	HashTable<grouprecord*, int> recordsTable;
 };
 CLICK_ENDDECLS
 

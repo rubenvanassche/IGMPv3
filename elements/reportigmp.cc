@@ -17,42 +17,81 @@ grouprecord* ReportIGMPElement::generateRecord(uint8_t type, IPAddress multicast
    return record;
 }
 
-void ReportIGMPElement::isINCLUDE(IPAddress multicast_address, int robustnessVariable){
+Packet* ReportIGMPElement::isINCLUDE(IPAddress multicast_address){
     Vector<IPAddress> sources;
     grouprecord* record = this->generateRecord(0x01, multicast_address, sources);
 
-    this->recordsTable.set(record, robustnessVariable);
+    Vector<grouprecord*> records;
+    records.push_back(record);
+
+    return this->generatePacket(records);
 }
 
-void ReportIGMPElement::isEXCLUDE(IPAddress multicast_address, int robustnessVariable){
+Packet* ReportIGMPElement::isEXCLUDE(IPAddress multicast_address){
     Vector<IPAddress> sources;
     grouprecord* record = this->generateRecord(0x02, multicast_address, sources);
 
-    this->recordsTable.set(record, robustnessVariable);
+    Vector<grouprecord*> records;
+    records.push_back(record);
+
+    return this->generatePacket(records);
 }
 
-void ReportIGMPElement::toIN(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable = 2){
+Packet* ReportIGMPElement::isINCLUDEOrEXCLUDE(HashTable<IPAddress, filtermode> multicast_addresses){
+    Vector<IPAddress> sources;
+    Vector<grouprecord*> records;
+    HashTable<IPAddress, filtermode>::iterator it;
+
+    for(it = multicast_addresses.begin();it != multicast_addresses.end();it++){
+        grouprecord* record = 0;
+
+        if(it->second == INCLUDE){
+            record = this->generateRecord(0x01, it->first, sources);
+        }else{
+            record = this->generateRecord(0x02, it->first, sources);
+        }
+
+        records.push_back(record);
+    }
+
+    return this->generatePacket(records);
+}
+
+
+Packet* ReportIGMPElement::toIN(IPAddress multicast_address, Vector<IPAddress>& sources){
     grouprecord* record = this->generateRecord(0x03, multicast_address, sources);
 
-    this->recordsTable.set(record, robustnessVariable);
+    Vector<grouprecord*> records;
+    records.push_back(record);
+
+    return this->generatePacket(records);
 }
 
-void ReportIGMPElement::toEX(IPAddress  multicast_address, Vector<IPAddress>& sources, int robustnessVariable = 2){
+Packet* ReportIGMPElement::toEX(IPAddress  multicast_address, Vector<IPAddress>& sources){
     grouprecord* record = this->generateRecord(0x04, multicast_address, sources);
 
-    this->recordsTable.set(record, robustnessVariable);
+    Vector<grouprecord*> records;
+    records.push_back(record);
+
+    return this->generatePacket(records);
 }
 
-void ReportIGMPElement::allow(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable){
+Packet* ReportIGMPElement::allow(IPAddress multicast_address, Vector<IPAddress>& sources){
     grouprecord* record = this->generateRecord(0x05, multicast_address, sources);
 
-    this->recordsTable.set(record, robustnessVariable);
+    Vector<grouprecord*> records;
+    records.push_back(record);
+
+    return this->generatePacket(records);
 }
 
-void ReportIGMPElement::block(IPAddress multicast_address, Vector<IPAddress>& sources, int robustnessVariable){
+Packet* ReportIGMPElement::block(IPAddress multicast_address, Vector<IPAddress>& sources){
     grouprecord* record = this->generateRecord(0x06, multicast_address, sources);
 
-    this->recordsTable.set(record, robustnessVariable);
+    Vector<grouprecord*> records;
+    records.push_back(record);
+
+    return this->generatePacket(records);
 }
 
 int ReportIGMPElement::calculateGrouprecordSize(grouprecord* record){
@@ -121,42 +160,8 @@ Packet* ReportIGMPElement::generatePacket(Vector<grouprecord*> records){
     return packet;
 }
 
-/**
- * [QueryIGMPElement::push description]
- * @param int
- * @param r
- *
- * Generates an IGMP Query Message, should be wrapped in an IP package with destination 224.0.0.1 or 224.0.0.22(see RFC)
- *
- */
 Packet* ReportIGMPElement::simple_action(int, Packet *r){
-    HashTable<grouprecord*, int>::iterator it;
-    Vector<grouprecord*> recordsToGenerate;
-    Vector<grouprecord*> recordsToRemove;
-    Vector<grouprecord*>::iterator it2;
-    for(it = this->recordsTable.begin();it != this->recordsTable.end();it++){
-        // Remove record if robustness variable is 0
-        if(it->second == 0){
-            recordsToRemove.push_back(it->first);
-            continue;
-        }
 
-        recordsToGenerate.push_back(it->first);
-        it->second -= 1;
-    }
-
-    // Remove records
-    for(it2 = recordsToRemove.begin();it2 != recordsToRemove.end();it2++){
-        this->recordsTable.erase(*it2);
-    }
-
-    // check if there are reports
-    if(this->recordsTable.size() == 0){
-        return NULL;
-    }
-
-
-    return this->generatePacket(recordsToGenerate);
 }
 
 
