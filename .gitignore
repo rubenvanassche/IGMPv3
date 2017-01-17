@@ -36,6 +36,8 @@
 .DS_Store
 
 # Click
+*.dump
+*.pcap
 
 click/bsdmodule
 
@@ -172,3 +174,7 @@ click/.settings/language.settings.xml
 click/.cproject
 
 click/.project
+
+*.pcap
+
+*.dump
