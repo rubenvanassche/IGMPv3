@@ -64,6 +64,7 @@ class IGMPClient : public Element {
 		// Variables
 		int unsolicited_report_interval = 1; // Send reports after x seconds random from [0, unsolicited_report_interval]
 		int robustness_variable = 2;
+		Vector<IPAddress> reportSources;
 };
 
 class ConfigParse{

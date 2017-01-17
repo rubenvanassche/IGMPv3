@@ -95,11 +95,10 @@ void IGMPClient::proccessQuery(Packet *p){
 }
 
 void IGMPClient::generalQuery(ProcessQuery &pq){
-    int max_response_code = pq.max_response_code;
+    int max_response_time = pq.max_response_code;
 
     for(int i = 0;i < this->robustness_variable;i++){
-        int reschedule = (int) (((double)((max_response_code*100)+1)/RAND_MAX) * rand() + 0);
-        click_chatter("RE %i", reschedule);
+        int reschedule = (int) (((double)((max_response_time*100)+1)/RAND_MAX) * rand() + 0);
 
         SendReportTimerData* data = new SendReportTimerData();
         data->report = this->reporter.isINCLUDEOrEXCLUDE(this->db->getMulticastFiltermodeTable());
@@ -121,6 +120,7 @@ void IGMPClient::groupAndSourceQuery(ProcessQuery &pq){
 
 void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources){
     this->db->setMode(multicast_address, EXCLUDE);
+    this->reportSources = sources;
 
     for(int i = 0;i < this->robustness_variable;i++){
         int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
@@ -136,15 +136,45 @@ void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddres
 
 }
 void IGMPClient::includeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources){
-    // NEEDS NOT TE BE IMPLEMENTED
-    click_chatter("IN -> IN(not impelemented)");
+    sources = vectorsUnion(sources, reportSources);
+    this->db->setMode(multicast_address, INCLUDE);
+    this->reportSources = sources;
+
+    for(int i = 0;i < this->robustness_variable;i++){
+        int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
+
+        SendReportTimerData* data = new SendReportTimerData();
+        data->report = this->reporter.toIN(multicast_address, sources);
+        data->me = this;
+
+
+        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
+        t->initialize(this);
+        t->schedule_after_msec(reschedule);
+    }
+
 }
 void IGMPClient::excludeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources){
-    // NEEDS NOT TE BE IMPLEMENTED
-    click_chatter("EX -> EX(not impelemented)");
+    sources = vectorsUnion(sources, reportSources);
+    this->db->setMode(multicast_address, EXCLUDE);
+    this->reportSources = sources;
+
+    for(int i = 0;i < this->robustness_variable;i++){
+        int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
+
+        SendReportTimerData* data = new SendReportTimerData();
+        data->report = this->reporter.toEX(multicast_address, sources);
+        data->me = this;
+
+        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
+        t->initialize(this);
+        t->schedule_after_msec(reschedule);
+    }
+
 }
 void IGMPClient::excludeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources){
     this->db->setMode(multicast_address, INCLUDE);
+    this->reportSources = sources;
 
     for(int i = 0;i < this->robustness_variable;i++){
         int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);

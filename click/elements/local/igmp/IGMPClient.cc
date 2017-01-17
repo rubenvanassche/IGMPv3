@@ -95,11 +95,10 @@ void IGMPClient::proccessQuery(Packet *p){
 }
 
 void IGMPClient::generalQuery(ProcessQuery &pq){
-    int max_response_code = pq.max_response_code;
+    int max_response_time = pq.max_response_code;
 
     for(int i = 0;i < this->robustness_variable;i++){
-        int reschedule = (int) (((double)((max_response_code*100)+1)/RAND_MAX) * rand() + 0);
-        click_chatter("RE %i", reschedule);
+        int reschedule = (int) (((double)((max_response_time*100)+1)/RAND_MAX) * rand() + 0);
 
         SendReportTimerData* data = new SendReportTimerData();
         data->report = this->reporter.isINCLUDEOrEXCLUDE(this->db->getMulticastFiltermodeTable());
