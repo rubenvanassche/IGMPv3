@@ -8,6 +8,7 @@
 #include "reportigmp.hh"
 #include "IGMPClientDB.hh"
 #include "ProcessQuery.hh"
+#include <algorithm>
 
 #if EXPLICIT_TEMPLATE_INSTANCES
 template class Vector<SomeThing>;
@@ -57,6 +58,8 @@ class IGMPClient : public Element {
 		struct SendReportTimerData{
 			IGMPClient* me;
 			Packet* report;
+            int timesTosend = 0; // Times this message should be send
+            int timeToWait = 0; // TIme to wait between message
 		};
 
 		static void handleSendReportTimer(Timer*, void *);
@@ -75,8 +78,7 @@ public:
 // Vector Operations
 Vector<IPAddress> vectorsUnion(Vector<IPAddress> a, Vector<IPAddress> b);
 Vector<IPAddress> vectorsIntersection(Vector<IPAddress> a, Vector<IPAddress> b);
-Vector<IPAddress> vectorsMinus(Vector<IPAddress> a, Vector<IPAddress> b);
-Vector<IPAddress> vectorsUnique(Vector<IPAddress> a);
+Vector<IPAddress> vectorsDifference(Vector<IPAddress> a, Vector<IPAddress> b);
 
 CLICK_ENDDECLS
 

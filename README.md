@@ -2,6 +2,7 @@
 Project voor Telecommunicatiesystemen.
 
 ## Hoe compileren?
+> make configure
 > make
 
 Compileert en runt ipnetwork.click

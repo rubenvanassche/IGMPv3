@@ -97,33 +97,33 @@ void IGMPClient::proccessQuery(Packet *p){
 void IGMPClient::generalQuery(ProcessQuery &pq){
     int max_response_time = pq.max_response_code;
 
-    for(int i = 0;i < this->robustness_variable;i++){
-        int reschedule = (int) (((double)((max_response_time*100)+1)/RAND_MAX) * rand() + 0);
+    int reschedule = (int) (((double)((max_response_time*100)+1)/RAND_MAX) * rand() + 0);
 
-        SendReportTimerData* data = new SendReportTimerData();
-        data->report = this->reporter.isINCLUDEOrEXCLUDE(this->db->getMulticastFiltermodeTable());
-        data->me = this;
+    SendReportTimerData* data = new SendReportTimerData();
+    data->report = this->reporter.isINCLUDEOrEXCLUDE(this->db->getMulticastFiltermodeTable());
+    data->me = this;
+    data->timesTosend = this->robustness_variable;
+    data->timeToWait = reschedule;
 
-        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
-        t->initialize(this);
-        t->schedule_after_msec(reschedule);
-    }
+    Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
+    t->initialize(this);
+    t->schedule_after_msec(reschedule);
 }
 
 void IGMPClient::groupQuery(ProcessQuery &pq){
     int max_response_time = pq.max_response_code;
 
-    for(int i = 0;i < this->robustness_variable;i++){
-        int reschedule = (int) (((double)((max_response_time*100)+1)/RAND_MAX) * rand() + 0);
+    int reschedule = (int) (((double)((max_response_time*100)+1)/RAND_MAX) * rand() + 0);
 
-        SendReportTimerData* data = new SendReportTimerData();
-        data->report = this->reporter.isINCLUDEOrEXCLUDE(this->db->getMulticastFiltermodeTable());
-        data->me = this;
+    SendReportTimerData* data = new SendReportTimerData();
+    data->report = this->reporter.isINCLUDEOrEXCLUDE(this->db->getMulticastFiltermodeTable());
+    data->me = this;
+    data->timesTosend = this->robustness_variable;
+    data->timeToWait = reschedule;
 
-        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
-        t->initialize(this);
-        t->schedule_after_msec(reschedule);
-    }
+    Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
+    t->initialize(this);
+    t->schedule_after_msec(reschedule);
 }
 
 void IGMPClient::groupAndSourceQuery(ProcessQuery &pq){
@@ -133,18 +133,18 @@ void IGMPClient::groupAndSourceQuery(ProcessQuery &pq){
 void IGMPClient::includeWithExclude(IPAddress multicast_address, Vector<IPAddress> sources){
     this->db->setMode(multicast_address, EXCLUDE);
 
-    for(int i = 0;i < this->robustness_variable;i++){
-        int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
+    int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
 
-        SendReportTimerData* data = new SendReportTimerData();
-        data->report = this->reporter.toEX(multicast_address, sources);
-        data->me = this;
+    SendReportTimerData* data = new SendReportTimerData();
+    data->report = this->reporter.toEX(multicast_address, sources);
+    data->me = this;
+    data->timesTosend = this->robustness_variable;
+    data->timeToWait = reschedule;
 
-        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
-        t->initialize(this);
-        t->schedule_after_msec(reschedule);
-    }
 
+    Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
+    t->initialize(this);
+    t->schedule_after_msec(reschedule);
 }
 void IGMPClient::includeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources){
     // NEEDS NOT TE BE IMPLEMENTED
@@ -157,24 +157,37 @@ void IGMPClient::excludeWithExclude(IPAddress multicast_address, Vector<IPAddres
 void IGMPClient::excludeWithInclude(IPAddress multicast_address, Vector<IPAddress> sources){
     this->db->setMode(multicast_address, INCLUDE);
 
-    for(int i = 0;i < this->robustness_variable;i++){
-        int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
+    int reschedule = (int) (((double)((this->unsolicited_report_interval*1000)+1)/RAND_MAX) * rand() + 0);
 
-        SendReportTimerData* data = new SendReportTimerData();
-        data->report = this->reporter.toIN(multicast_address, sources);
-        data->me = this;
+    SendReportTimerData* data = new SendReportTimerData();
+    data->report = this->reporter.toIN(multicast_address, sources);
+    data->me = this;
+    data->me = this;
+    data->timesTosend = this->robustness_variable;
+    data->timeToWait = reschedule;
 
-
-        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
-        t->initialize(this);
-        t->schedule_after_msec(reschedule);
-    }
+    Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
+    t->initialize(this);
+    t->schedule_after_msec(reschedule);
 }
 
 void IGMPClient::handleSendReportTimer(Timer*, void * data){
     SendReportTimerData* timerdata = (SendReportTimerData*) data;
     assert(timerdata); // the cast must be good
-    timerdata->me->push(0, timerdata->report);
+
+    click_chatter("------------SEND REPORT TIMER");
+
+    if(timerdata->timesTosend > 1){
+        timerdata->timesTosend -= 1;
+        Packet* sendablePacket = timerdata->report->clone();
+        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,timerdata);
+        t->initialize(timerdata->me);
+        t->schedule_after_msec(timerdata->timeToWait);
+
+        timerdata->me->push(0, sendablePacket); // Send
+    }else{
+        timerdata->me->push(0, timerdata->report); // Send
+    }
 }
 
 int IGMPClient::includeSourcesHandler(const String &conf, Element *e, void * thunk, ErrorHandler * errh){
@@ -318,20 +331,17 @@ IPAddress ConfigParse::multicastAddress(const String &conf, ErrorHandler * errh)
 }
 
 Vector<IPAddress> vectorsUnion(Vector<IPAddress> a, Vector<IPAddress> b){
-    Vector<IPAddress> out = a;
+    Vector<IPAddress> out;
 
-    for(int i = 0;i < b.size();i++){
-        bool inA = false;
-
-        for(int j = 0;j < out.size();j++){
-            if(b.at(i) == out.at(j)){
-                inA = true;
-                break;
-            }
+    for(Vector<IPAddress>::iterator it = a.begin(); it != a.end(); it++){
+        if(std::find(out.begin(), out.end(), *it) == out.end()){
+            out.insert(out.end(), *it);
         }
+    }
 
-        if(inA == false){
-            out.push_back(b.at(i));
+    for(Vector<IPAddress>::iterator it2 = b.begin(); it2 != b.end(); it2++){
+        if(std::find(out.begin(), out.end(), *it2) == out.end()){
+            out.insert(out.end(), *it2);
         }
     }
 
@@ -341,61 +351,43 @@ Vector<IPAddress> vectorsUnion(Vector<IPAddress> a, Vector<IPAddress> b){
 Vector<IPAddress> vectorsIntersection(Vector<IPAddress> a, Vector<IPAddress> b){
     Vector<IPAddress> out;
 
-    for(int i = 0;i < b.size();i++){
-        bool inA = false;
-
-        for(int j = 0;j < a.size();j++){
-            if(b.at(i) == a.at(j)){
-                inA = true;
+    for(Vector<IPAddress>::iterator it = a.begin(); it != a.end(); it++){
+        for(Vector<IPAddress>::iterator it2 = b.begin(); it2 != b.end(); it2++){
+            if((*it) == (*it2)) {
+                if(std::find(out.begin(), out.end(), *it) == out.end()){
+                    out.insert(out.end(), *it2);
+                    break;
+                }
             }
         }
 
-        if(inA == true){
-            out.push_back(b.at(i));
-        }
     }
 
     return out;
 }
 
 Vector<IPAddress> vectorsMinus(Vector<IPAddress> a, Vector<IPAddress> b){
-    Vector<IPAddress> out = a;
-    Vector<IPAddress>::iterator it = out.begin();
+    Vector<IPAddress> out;
 
-    while(it != out.end()){
-        bool jump = false;
-
-        for(int j = 0;j < b.size();j++){
-            if(*it == b.at(j)){
-                jump = true;
-                Vector<IPAddress>::iterator it2 = it;
-                it++;
-                out.erase(it2);
+    for(Vector<IPAddress>::iterator it = a.begin(); it != a.end(); it++){
+        bool matched = false;
+        for(Vector<IPAddress>::iterator it2 = b.begin(); it2 != b.end(); it2++){
+            if((*it) == (*it2)){
+                matched = true;
                 break;
             }
         }
 
-        if(jump == false){
-            it++;
-        }
-    }
-
-
-    return out;
-
-}
-
-Vector<IPAddress> vectorsUnique(Vector<IPAddress> a){
-    Vector<IPAddress> out;
-
-    for(int i = 0;i < out.size();i++){
-        for(int j = 0;j < a.size();j++){
-            if(out.at(i) == a.at(j)){
-
+        if(!matched){
+            if(std::find(out.begin(), out.end(), *it) == out.end()){
+                out.insert(out.end(), *it);
             }
         }
     }
+
+    return out;
 }
+
 
 CLICK_ENDDECLS
 EXPORT_ELEMENT(IGMPClient)
