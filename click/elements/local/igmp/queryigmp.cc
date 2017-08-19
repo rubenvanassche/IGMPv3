@@ -71,17 +71,22 @@ Packet* QueryIGMPElement::generatePacket(IPAddress multicast_address){
     unsigned char * igmpbegin = (unsigned char *)packet->data();
     igmpv3query* format = (igmpv3query*)igmpbegin;
 
+    bool surpessRouterSideProcessing = false;
+
     // Type for IGMP Query Packet
     format->type = 0x11;
-    // TODO: the responsecode may vary, the value 1 is ok
+    // default 100
     format->max_response_code = 0x64;
     // Checksum will be calculated later
     format->checksum = 0x0000;
     // The address of the multicast group
     format->group_address = multicast_address.addr();
-    // do not surpress and robustness_variable = 2
-    format->resv_and_s_and_qrv = 0x02;
-    // TODO: this
+    // robustness variable = 2
+    if(surpessRouterSideProcessing == true){
+        format->resv_and_s_and_qrv = 0x0a;
+    }else{
+        format->resv_and_s_and_qrv = 0x02;
+    }
     format->qqic = 0x7d;
     // The amount of sources
     format->no_of_sources = htons(sourcesVector.size());

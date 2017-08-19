@@ -178,3 +178,5 @@ click/.project
 *.pcap
 
 *.dump
+
+click/server_network.pcap

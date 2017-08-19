@@ -111,7 +111,19 @@ void IGMPClient::generalQuery(ProcessQuery &pq){
 }
 
 void IGMPClient::groupQuery(ProcessQuery &pq){
+    int max_response_time = pq.max_response_code;
 
+    for(int i = 0;i < this->robustness_variable;i++){
+        int reschedule = (int) (((double)((max_response_time*100)+1)/RAND_MAX) * rand() + 0);
+
+        SendReportTimerData* data = new SendReportTimerData();
+        data->report = this->reporter.isINCLUDEOrEXCLUDE(this->db->getMulticastFiltermodeTable());
+        data->me = this;
+
+        Timer* t = new Timer(&IGMPClient::handleSendReportTimer,data);
+        t->initialize(this);
+        t->schedule_after_msec(reschedule);
+    }
 }
 
 void IGMPClient::groupAndSourceQuery(ProcessQuery &pq){
