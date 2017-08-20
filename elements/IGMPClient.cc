@@ -175,7 +175,6 @@ void IGMPClient::handleSendReportTimer(Timer*, void * data){
     SendReportTimerData* timerdata = (SendReportTimerData*) data;
     assert(timerdata); // the cast must be good
 
-    click_chatter("------------SEND REPORT TIMER");
 
     if(timerdata->timesTosend > 1){
         timerdata->timesTosend -= 1;
@@ -188,6 +187,10 @@ void IGMPClient::handleSendReportTimer(Timer*, void * data){
     }else{
         timerdata->me->push(0, timerdata->report); // Send
     }
+}
+
+void IGMPClient::handleSendGeneralQueryResponse(Timer* timer, void* data){
+
 }
 
 int IGMPClient::includeSourcesHandler(const String &conf, Element *e, void * thunk, ErrorHandler * errh){

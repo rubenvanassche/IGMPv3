@@ -53,7 +53,6 @@ class IGMPClient : public Element {
 		IGMPClientDB* db;
 		IPAddress ipAddress;
 
-
 		// Send report timer
 		struct SendReportTimerData{
 			IGMPClient* me;
@@ -62,11 +61,16 @@ class IGMPClient : public Element {
             int timeToWait = 0; // TIme to wait between message
 		};
 
+        // Timer executes
 		static void handleSendReportTimer(Timer*, void *);
+        static void handleSendGeneralQueryResponse(Timer*, void *);
 
 		// Variables
 		int unsolicited_report_interval = 1; // Send reports after x seconds random from [0, unsolicited_report_interval]
 		int robustness_variable = 2;
+
+        // Timers
+        Timer* generalQueryResponseTimer;
 };
 
 class ConfigParse{

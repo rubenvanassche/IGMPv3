@@ -78,7 +78,15 @@ class IGMPRouter : public Element {
 		int query_interval = 125; // Send each query_interval (seconds) an general query_interval
 		int query_response_interval = 100; // for the MAX Response code, 100 is 10 seconds, must be < query_interval
 		int group_memberschip_interval = robustness_variable*query_interval*query_response_interval; // Time when router decides there are no more members for a group or source from the network
-		int last_member_query_interval = 10; // Max response for Group-specific queries
+		int other_querier_interval = robustness_variable*query_response_interval + (1/2*query_response_interval);
+		double startup_query_interval = 1/4*query_interval;
+		int startup_query_count = robustness_variable;
+		int last_member_query_interval = 10;
+		int last_member_query_count = robustness_variable;
+		int last_member_query_time = last_member_query_interval * last_member_query_count;
+		int max_response_time = 100;
+
+
 };
 
 CLICK_ENDDECLS

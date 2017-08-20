@@ -58,7 +58,7 @@ void IGMPRouter::sendGroupQuery(IPAddress multicast_address){
 
         Timer* t = new Timer(&IGMPRouter::handleSendGroupQuery,data);
         t->initialize(this);
-        t->schedule_after_msec(10);
+        t->schedule_after_msec(2);
     }
 
     this->groupQuerysSheduled.push_back(multicast_address);
